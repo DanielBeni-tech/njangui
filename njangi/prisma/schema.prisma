@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model WaitlistUser {
+  id                            String    @id @default(cuid())
+  email                         String?
+  phone                         String?
+  countryCode                   String?
+  preferredNotificationMethod   String?   @db.VarChar(20)
+  device                        String?
+  utmSource                     String?
+  utmMedium                     String?
+  utmCampaign                   String?
+  referralCode                  String?
+  source                        String?   @db.VarChar(100)
+  notifiedAt                    DateTime?
+  notificationStatus            String    @default("pending") @db.VarChar(20)
+  createdAt                     DateTime  @default(now()) @db.Timestamp()
+  updatedAt                     DateTime  @default(now()) @updatedAt @db.Timestamp()
+
+  @@unique([email], map: "waitlist_users_email_unique", where: raw("email IS NOT NULL"))
+  @@unique([phone], map: "waitlist_users_phone_unique", where: raw("phone IS NOT NULL"))
+  @@index([email])
+  @@index([phone])
+  @@index([createdAt])
+  @@index([notificationStatus])
+}
