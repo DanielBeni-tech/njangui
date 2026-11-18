@@ -1,10 +1,14 @@
 /**
- * Jetons de design de Njangi.
+ * Jetons de design de Njangui.
  *
  * Chaque écran ne lit que des couleurs sémantiques (`background`, `card`,
  * `text`, `purple`…). Les palettes `light` et `dark` fournissent la même
  * liste de clés : basculer de thème ne demande donc aucune condition dans
  * les styles.
+ *
+ * Règle de couleur : les surfaces restent neutres, les accents servent à
+ * signaler (statut, action, montant) et couvrent moins d'un dixième de
+ * l'écran. Les contrastes de corps de texte visent 4,5–7:1, pas le maximum.
  */
 export type Palette = {
   /** Fond principal des écrans. */
@@ -51,97 +55,97 @@ export type Palette = {
   scrim: string;
   shadow: string;
 
-  /** Halos décoratifs de l'écran de connexion. */
+  /** Halos décoratifs de la couverture. */
   decorA: string;
   decorB: string;
 };
 
 export const light: Palette = {
   background: '#FFFFFF',
-  backgroundAlt: '#F7FBFA',
+  backgroundAlt: '#F6F8F7',
   card: '#FFFFFF',
-  cardMuted: '#F3F6F5',
+  cardMuted: '#F2F5F4',
 
-  text: '#131A17',
-  textMuted: '#4B5563',
-  textFaint: '#8A9298',
+  text: '#101614',
+  textMuted: '#4A5451',
+  textFaint: '#6B7570',
 
-  border: '#E3E8E6',
-  borderStrong: '#C4CCC8',
+  border: '#E4E9E7',
+  borderStrong: '#C7CFCB',
 
-  purple: '#7B2D8B',
-  purpleSolid: '#7B2D8B',
-  purpleSoft: 'rgba(123,45,139,0.08)',
+  purple: '#6E2B7C',
+  purpleSolid: '#6E2B7C',
+  purpleSoft: 'rgba(110,43,124,0.08)',
 
-  mint: '#90EED4',
-  mintSoft: '#ECFAF5',
-  onMint: '#0F211B',
+  mint: '#8FE6CA',
+  mintSoft: '#EAF7F2',
+  onMint: '#10211C',
 
-  green: '#2E9E6E',
-  greenSolid: '#2E9E6E',
-  greenSoft: '#E8F7F0',
+  green: '#2E8F68',
+  greenSolid: '#2E8F68',
+  greenSoft: '#E7F4EE',
 
-  teal: '#2E8B9A',
-  tealSoft: 'rgba(46,139,154,0.10)',
+  teal: '#2A8390',
+  tealSoft: 'rgba(42,131,144,0.10)',
 
-  red: '#F44336',
-  redDark: '#C62828',
-  redSoft: '#FFEBEE',
+  red: '#C4453C',
+  redDark: '#A8372F',
+  redSoft: '#FBEDEC',
 
-  blue: '#2196F3',
-  blueSoft: 'rgba(33,150,243,0.10)',
+  blue: '#2F6FB8',
+  blueSoft: 'rgba(47,111,184,0.10)',
 
   onAccent: '#FFFFFF',
-  toast: '#2B3230',
+  toast: '#232B29',
   scrim: 'rgba(9,14,12,0.45)',
   shadow: '#0F211B',
 
-  decorA: 'rgba(123,45,139,0.07)',
-  decorB: 'rgba(144,238,212,0.22)',
+  decorA: 'rgba(110,43,124,0.06)',
+  decorB: 'rgba(46,143,104,0.07)',
 };
 
 export const dark: Palette = {
-  background: '#0D1211',
-  backgroundAlt: '#121917',
-  card: '#161E1C',
-  cardMuted: '#1C2523',
+  background: '#0F1412',
+  backgroundAlt: '#141B18',
+  card: '#161C1A',
+  cardMuted: '#1B2320',
 
-  text: '#F1F6F4',
-  textMuted: '#A7B3AF',
-  textFaint: '#7C8783',
+  text: '#E8EEEB',
+  textMuted: '#9AA69F',
+  textFaint: '#7A857F',
 
-  border: '#25302D',
-  borderStrong: '#38453F',
+  border: '#26302C',
+  borderStrong: '#35423C',
 
-  purple: '#C98AD7',
-  purpleSolid: '#7B2D8B',
-  purpleSoft: 'rgba(201,138,215,0.16)',
+  purple: '#C9A2D9',
+  purpleSolid: '#7B3A8B',
+  purpleSoft: 'rgba(201,162,217,0.14)',
 
-  mint: '#7FE3C6',
-  mintSoft: 'rgba(127,227,198,0.13)',
+  mint: '#6FD3B3',
+  mintSoft: 'rgba(111,211,179,0.12)',
   onMint: '#0B1A15',
 
-  green: '#5FCB9B',
-  greenSolid: '#2E9E6E',
-  greenSoft: 'rgba(95,203,155,0.14)',
+  green: '#57BE92',
+  greenSolid: '#2E8F68',
+  greenSoft: 'rgba(87,190,146,0.13)',
 
   teal: '#6EC5D2',
-  tealSoft: 'rgba(110,197,210,0.16)',
+  tealSoft: 'rgba(110,197,210,0.14)',
 
-  red: '#FF7B72',
-  redDark: '#FF8A80',
-  redSoft: 'rgba(255,123,114,0.16)',
+  red: '#E5807A',
+  redDark: '#C4625C',
+  redSoft: 'rgba(229,128,122,0.14)',
 
-  blue: '#74BAFF',
-  blueSoft: 'rgba(116,186,255,0.16)',
+  blue: '#7FB4E8',
+  blueSoft: 'rgba(127,180,232,0.14)',
 
   onAccent: '#FFFFFF',
-  toast: '#24302C',
-  scrim: 'rgba(0,0,0,0.62)',
+  toast: '#1E2724',
+  scrim: 'rgba(0,0,0,0.6)',
   shadow: '#000000',
 
-  decorA: 'rgba(201,138,215,0.10)',
-  decorB: 'rgba(127,227,198,0.07)',
+  decorA: 'rgba(201,162,217,0.08)',
+  decorB: 'rgba(111,211,179,0.06)',
 };
 
 /** Raccourci historique (thème clair) — conservé pour les rares usages figés. */
@@ -150,7 +154,7 @@ export const colors = light;
 export const radius = {
   card: 16,
   field: 12,
-  pill: 30,
+  pill: 22,
 };
 
 export const screenPadding = 20;

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { Palette } from '../theme';
 import { useStyles, useTheme } from '../store/Theme';
+import { LogoLoader } from './LogoLoader';
 
 type Variant = 'mint' | 'green' | 'purple' | 'danger' | 'ghost';
 
@@ -34,7 +34,7 @@ export function PrimaryButton({
   variant = 'mint',
   loading = false,
   disabled = false,
-  height = 55,
+  height = 54,
   leftIcon,
   rightIcon,
   labelStyle,
@@ -68,19 +68,19 @@ export function PrimaryButton({
       style={({ pressed }) => [
         styles.base,
         { backgroundColor: fond[variant], height },
-        inactif && styles.inactif,
+        inactif && !loading && styles.inactif,
         pressed && !inactif && styles.presse,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={couleurTexte} />
+        <LogoLoader size={24} delay={0} color={couleurTexte} />
       ) : (
         <View style={styles.contenu}>
           {leftIcon ? (
             <MaterialIcons
               name={leftIcon}
-              size={20}
+              size={19}
               color={couleurTexte}
               style={styles.iconeGauche}
             />
@@ -106,14 +106,14 @@ const makeStyles = (c: Palette) =>
   StyleSheet.create({
     base: {
       width: '100%',
-      borderRadius: 30,
+      borderRadius: 16,
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: c.shadow,
-      shadowOpacity: 0.08,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 2,
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 1,
     },
     contenu: {
       flexDirection: 'row',
@@ -128,10 +128,10 @@ const makeStyles = (c: Palette) =>
       marginRight: 8,
     },
     iconeDroite: {
-      marginLeft: 10,
+      marginLeft: 8,
     },
     inactif: {
-      opacity: 0.55,
+      opacity: 0.5,
     },
     presse: {
       opacity: 0.88,

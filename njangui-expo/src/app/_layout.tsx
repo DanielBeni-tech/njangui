@@ -17,10 +17,12 @@ function Routes() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
+        animation: 'fade',
       }}
     >
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="connexion" />
         <Stack.Screen name="verification" />
         <Stack.Screen name="code" />
       </Stack.Protected>

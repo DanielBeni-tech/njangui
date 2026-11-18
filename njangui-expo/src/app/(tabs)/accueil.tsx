@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,8 +11,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Palette, screenPadding } from '../../theme';
 import { useStyles, useTheme } from '../../store/Theme';
+import { Logo } from '../../ui/Logo';
 import { TontineCard } from '../../ui/TontineCard';
 import { useAppData } from '../../store/AppData';
+
+type ActionRapideProps = {
+  icone: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  onPress: () => void;
+  principal?: boolean;
+};
 
 export default function AccueilScreen() {
   const styles = useStyles(makeStyles);
@@ -23,6 +30,37 @@ export default function AccueilScreen() {
   const membres = tontines.reduce((total, t) => total + t.membres.length, 0);
   const enCours = tontines.filter((t) => t.enCours).length;
 
+  const ActionRapide = ({
+    icone,
+    label,
+    onPress,
+    principal = false,
+  }: ActionRapideProps) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => [
+        styles.action,
+        principal && styles.actionPrincipale,
+        pressed && styles.presse,
+      ]}
+    >
+      <MaterialIcons
+        name={icone}
+        size={19}
+        color={principal ? colors.onAccent : colors.text}
+      />
+      <Text
+        style={[
+          styles.actionTexte,
+          principal && styles.actionTextePrincipale,
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+
   return (
     <SafeAreaView style={styles.ecran} edges={['top']}>
       <ScrollView
@@ -30,74 +68,37 @@ export default function AccueilScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.entete}>
-          <View style={styles.marque}>
-            <Image
-              source={require('../../../assets/images/njangi_logo.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <View style={styles.marqueTexte}>
-              <Text style={styles.nom}>Njangi</Text>
-              <Text style={styles.slogan}>la tontine, sans conflit</Text>
-            </View>
-          </View>
+          <Logo size={30} withName nameSize={14} />
 
           <Pressable
             onPress={() => router.push('/alertes')}
-            accessibilityLabel="Voir les notifications"
+            accessibilityLabel="Voir les alertes"
+            hitSlop={8}
             style={({ pressed }) => [styles.cloche, pressed && styles.presse]}
           >
             <MaterialIcons
-              name="notifications-none"
-              size={22}
+              name={nonLues > 0 ? 'notifications' : 'notifications-none'}
+              size={20}
               color={colors.text}
             />
-            {nonLues > 0 ? (
-              <View style={styles.badge}>
-                <Text style={styles.badgeTexte}>{nonLues}</Text>
-              </View>
-            ) : null}
+            {nonLues > 0 ? <View style={styles.badge} /> : null}
           </Pressable>
         </View>
 
         <Text style={styles.bonjour}>Bonjour Mégane</Text>
-        <Text style={styles.sousBonjour}>
-          Voici l’état de vos tontines aujourd’hui.
-        </Text>
 
-        <View style={styles.hero}>
-          <View style={styles.heroIcone}>
-            <MaterialIcons name="savings" size={22} color={colors.onMint} />
-          </View>
-          <Text style={styles.heroTitre}>
-            Créez vos tontines en toute transparence
-          </Text>
-          <Text style={styles.heroTexte}>
-            Règles claires, paiements suivis, zéro conflit.
-          </Text>
-
-          <View style={styles.heroActions}>
-            <Pressable
-              onPress={() => router.push('/creation')}
-              style={({ pressed }) => [
-                styles.heroBouton,
-                pressed && styles.presse,
-              ]}
-            >
-              <MaterialIcons name="add" size={18} color={colors.onAccent} />
-              <Text style={styles.heroBoutonTexte}>Créer</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => router.push('/rejoindre')}
-              style={({ pressed }) => [
-                styles.heroBoutonFantome,
-                pressed && styles.presse,
-              ]}
-            >
-              <MaterialIcons name="group-add" size={18} color={colors.onMint} />
-              <Text style={styles.heroBoutonFantomeTexte}>Rejoindre</Text>
-            </Pressable>
-          </View>
+        <View style={styles.actions}>
+          <ActionRapide
+            icone="add"
+            label="Créer"
+            principal
+            onPress={() => router.push('/creation')}
+          />
+          <ActionRapide
+            icone="group-add"
+            label="Rejoindre"
+            onPress={() => router.push('/rejoindre')}
+          />
         </View>
 
         <View style={styles.stats}>
@@ -120,7 +121,7 @@ export default function AccueilScreen() {
         <View style={styles.sectionLigne}>
           <Text style={styles.section}>Mes tontines</Text>
           {tontines.length > 0 ? (
-            <Pressable onPress={() => router.push('/tontines')} hitSlop={8}>
+            <Pressable onPress={() => router.push('/tontines')} hitSlop={10}>
               <Text style={styles.voirTout}>Tout voir</Text>
             </Pressable>
           ) : null}
@@ -130,12 +131,12 @@ export default function AccueilScreen() {
           <View style={styles.vide}>
             <MaterialIcons
               name="groups"
-              size={40}
+              size={34}
               color={colors.textFaint}
             />
-            <Text style={styles.videTitre}>Aucune tontine pour l’instant</Text>
+            <Text style={styles.videTitre}>Aucune tontine</Text>
             <Text style={styles.videTexte}>
-              Créez votre première tontine ou rejoignez-en une avec un code.
+              Créez la vôtre ou entrez un code d’invitation.
             </Text>
           </View>
         ) : (
@@ -165,7 +166,7 @@ const makeStyles = (c: Palette) =>
     },
     contenu: {
       paddingHorizontal: screenPadding,
-      paddingTop: 18,
+      paddingTop: 16,
       paddingBottom: 28,
     },
     entete: {
@@ -173,144 +174,76 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       justifyContent: 'space-between',
     },
-    marque: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    logo: {
-      height: 44,
-      width: 44,
-    },
-    marqueTexte: {
-      marginLeft: 10,
-    },
-    nom: {
-      fontSize: 20,
-      fontWeight: '800',
-      color: c.purple,
-      letterSpacing: -0.3,
-    },
-    slogan: {
-      fontSize: 11,
-      color: c.textFaint,
-    },
     cloche: {
-      width: 42,
-      height: 42,
-      borderRadius: 21,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
       backgroundColor: c.cardMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },
     badge: {
       position: 'absolute',
-      top: 4,
-      right: 4,
-      minWidth: 17,
-      height: 17,
-      borderRadius: 9,
-      paddingHorizontal: 4,
+      top: 10,
+      right: 11,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
       backgroundColor: c.red,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    badgeTexte: {
-      color: c.onAccent,
-      fontSize: 10,
-      fontWeight: '700',
     },
     presse: {
-      opacity: 0.8,
+      opacity: 0.75,
     },
     bonjour: {
-      marginTop: 24,
-      fontSize: 24,
-      fontWeight: '800',
+      marginTop: 26,
+      fontSize: 23,
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.5,
     },
-    sousBonjour: {
-      marginTop: 4,
-      fontSize: 13.5,
-      color: c.textMuted,
-    },
-    hero: {
-      marginTop: 18,
-      backgroundColor: c.mint,
-      borderRadius: 22,
-      padding: 18,
-    },
-    heroIcone: {
-      width: 40,
-      height: 40,
-      borderRadius: 13,
-      backgroundColor: 'rgba(15,33,27,0.10)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    heroTitre: {
-      marginTop: 12,
-      fontSize: 18,
-      lineHeight: 24,
-      fontWeight: '800',
-      color: c.onMint,
-      letterSpacing: -0.2,
-    },
-    heroTexte: {
-      marginTop: 6,
-      fontSize: 13,
-      color: 'rgba(15,33,27,0.72)',
-    },
-    heroActions: {
+    actions: {
       marginTop: 16,
       flexDirection: 'row',
       gap: 10,
     },
-    heroBouton: {
+    action: {
+      flex: 1,
+      height: 52,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 24,
-      backgroundColor: c.onMint,
-    },
-    heroBoutonTexte: {
-      color: c.onAccent,
-      fontSize: 13.5,
-      fontWeight: '700',
-    },
-    heroBoutonFantome: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 24,
-      backgroundColor: 'rgba(255,255,255,0.55)',
-    },
-    heroBoutonFantomeTexte: {
-      color: c.onMint,
-      fontSize: 13.5,
-      fontWeight: '700',
-    },
-    stats: {
-      marginTop: 16,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: c.card,
+      justifyContent: 'center',
+      gap: 7,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
-      borderRadius: 18,
-      paddingVertical: 14,
+      backgroundColor: c.card,
+    },
+    actionPrincipale: {
+      backgroundColor: c.purpleSolid,
+      borderColor: c.purpleSolid,
+    },
+    actionTexte: {
+      fontSize: 14.5,
+      fontWeight: '600',
+      color: c.text,
+    },
+    actionTextePrincipale: {
+      color: c.onAccent,
+    },
+    stats: {
+      marginTop: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.backgroundAlt,
+      borderRadius: 14,
+      paddingVertical: 13,
     },
     stat: {
       flex: 1,
       alignItems: 'center',
     },
     statValeur: {
-      fontSize: 20,
-      fontWeight: '800',
+      fontSize: 19,
+      fontWeight: '700',
       color: c.text,
     },
     statLabel: {
@@ -320,19 +253,19 @@ const makeStyles = (c: Palette) =>
     },
     separateur: {
       width: 1,
-      height: 28,
+      height: 26,
       backgroundColor: c.border,
     },
     sectionLigne: {
       marginTop: 26,
-      marginBottom: 14,
+      marginBottom: 12,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
     },
     section: {
-      fontSize: 17,
-      fontWeight: '800',
+      fontSize: 16.5,
+      fontWeight: '700',
       color: c.text,
     },
     voirTout: {
@@ -342,19 +275,19 @@ const makeStyles = (c: Palette) =>
     },
     vide: {
       alignItems: 'center',
-      paddingVertical: 34,
+      paddingVertical: 30,
       paddingHorizontal: 24,
-      borderRadius: 18,
-      backgroundColor: c.cardMuted,
+      borderRadius: 14,
+      backgroundColor: c.backgroundAlt,
     },
     videTitre: {
-      marginTop: 12,
+      marginTop: 10,
       fontSize: 15,
-      fontWeight: '700',
+      fontWeight: '600',
       color: c.text,
     },
     videTexte: {
-      marginTop: 6,
+      marginTop: 5,
       fontSize: 13,
       lineHeight: 19,
       color: c.textMuted,

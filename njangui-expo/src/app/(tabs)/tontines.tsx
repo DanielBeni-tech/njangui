@@ -31,12 +31,7 @@ export default function TontinesScreen() {
   return (
     <SafeAreaView style={styles.ecran} edges={['top']}>
       <View style={styles.entete}>
-        <View>
-          <Text style={styles.titre}>Mes tontines</Text>
-          <Text style={styles.sousTitre}>
-            {tontines.length} tontine{tontines.length > 1 ? 's' : ''} au total
-          </Text>
-        </View>
+        <Text style={styles.titre}>Mes tontines</Text>
         <Pressable
           onPress={() => router.push('/rejoindre')}
           hitSlop={8}
@@ -129,18 +124,12 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: screenPadding,
-      paddingTop: 18,
+      paddingTop: 20,
     },
     titre: {
-      fontSize: 24,
-      fontWeight: '800',
+      fontSize: 23,
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.5,
-    },
-    sousTitre: {
-      marginTop: 3,
-      fontSize: 12.5,
-      color: c.textFaint,
     },
     rejoindre: {
       flexDirection: 'row',
@@ -192,10 +181,10 @@ const makeStyles = (c: Palette) =>
     },
     vide: {
       alignItems: 'center',
-      paddingVertical: 36,
+      paddingVertical: 30,
       paddingHorizontal: 24,
-      borderRadius: 18,
-      backgroundColor: c.cardMuted,
+      borderRadius: 14,
+      backgroundColor: c.backgroundAlt,
       marginTop: 8,
     },
     videTitre: {

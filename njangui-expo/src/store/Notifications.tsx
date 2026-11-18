@@ -15,7 +15,9 @@ import {
   requestPermission,
 } from '../services/notifications';
 
-const CLE = 'njangi.notifications.enabled';
+const CLE = 'njangui.notifications.enabled';
+/** Clé de l'ancienne version, lue une seule fois pour ne pas perdre le réglage. */
+const ANCIENNE_CLE = 'njangi.notifications.enabled';
 
 type NotificationsValue = {
   /** L'utilisateur accepte les notifications dans l'application. */
@@ -45,7 +47,9 @@ export function NotificationsProvider({
     let actif = true;
 
     (async () => {
-      const stocke = await AsyncStorage.getItem(CLE).catch(() => null);
+      const stocke =
+        (await AsyncStorage.getItem(CLE).catch(() => null)) ??
+        (await AsyncStorage.getItem(ANCIENNE_CLE).catch(() => null));
       const souhaite = stocke !== 'false';
 
       if (actif) setEnabledState(souhaite);
@@ -88,7 +92,7 @@ export function NotificationsProvider({
   );
 
   const envoyerTest = useCallback(
-    () => notifyLocal('Njangi', 'Les notifications fonctionnent sur ce téléphone.'),
+    () => notifyLocal('Njangui', 'Les notifications fonctionnent sur ce téléphone.'),
     [],
   );
 

@@ -25,6 +25,7 @@ export default function RejoindreScreen() {
   const toast = useToast();
 
   const [code, setCode] = useState('');
+  const [recherche, setRecherche] = useState(false);
   const [trouvee, setTrouvee] = useState<Tontine | null>(null);
 
   const InfoRow = ({ label, valeur }: { label: string; valeur: string }) => (
@@ -34,15 +35,19 @@ export default function RejoindreScreen() {
     </View>
   );
 
-  const rechercher = () => {
+  const rechercher = async () => {
     if (!code.trim()) {
-      toast("Veuillez entrer un code d'invitation");
+      toast("Entrez un code d'invitation");
       return;
     }
+    setRecherche(true);
+    // Petit délai : le résultat ne doit pas clignoter.
+    await new Promise((resolve) => setTimeout(resolve, 320));
     const tontine = findTontineByCode(code);
     setTrouvee(tontine ?? null);
+    setRecherche(false);
     if (!tontine) {
-      toast('Code invalide. Aucune tontine trouvée.', 'error');
+      toast('Aucune tontine avec ce code', 'error');
     }
   };
 
@@ -70,13 +75,9 @@ export default function RejoindreScreen() {
           onPress={() => router.back()}
         />
 
-        <View style={styles.iconeZone}>
-          <MaterialIcons name="group-add" size={34} color={colors.green} />
-        </View>
-
-        <Text style={styles.titre}>Entrez le code d’invitation</Text>
+        <Text style={styles.titre}>Code d’invitation</Text>
         <Text style={styles.sousTitre}>
-          Demandez le code au gestionnaire de la tontine. Exemple : FAM001
+          Demandez-le au gestionnaire de la tontine.
         </Text>
 
         <TextInput
@@ -96,6 +97,7 @@ export default function RejoindreScreen() {
         <PrimaryButton
           label="Rechercher"
           onPress={rechercher}
+          loading={recherche}
           variant="purple"
           leftIcon="search"
           style={styles.boutonRechercher}
@@ -150,39 +152,25 @@ const makeStyles = (c: Palette) =>
       paddingTop: 18,
       paddingBottom: 24,
     },
-    iconeZone: {
-      marginTop: 34,
-      alignSelf: 'center',
-      width: 76,
-      height: 76,
-      borderRadius: 26,
-      backgroundColor: c.greenSoft,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     titre: {
-      marginTop: 18,
-      fontSize: 21,
-      fontWeight: '800',
+      marginTop: 24,
+      fontSize: 23,
+      fontWeight: '700',
       color: c.text,
-      textAlign: 'center',
-      letterSpacing: -0.3,
     },
     sousTitre: {
-      marginTop: 8,
-      fontSize: 13,
+      marginTop: 6,
+      fontSize: 14,
       color: c.textMuted,
-      textAlign: 'center',
-      lineHeight: 19,
     },
     saisieCode: {
       marginTop: 26,
       borderWidth: 1.5,
       borderColor: c.borderStrong,
-      borderRadius: 16,
-      paddingVertical: 15,
-      fontSize: 24,
-      fontWeight: '800',
+      borderRadius: 14,
+      paddingVertical: 14,
+      fontSize: 22,
+      fontWeight: '700',
       letterSpacing: 7,
       color: c.text,
       backgroundColor: c.card,
@@ -194,7 +182,7 @@ const makeStyles = (c: Palette) =>
       marginTop: 24,
       borderWidth: 1,
       borderColor: c.border,
-      borderRadius: 18,
+      borderRadius: 14,
       backgroundColor: c.backgroundAlt,
       padding: 16,
     },
@@ -213,11 +201,9 @@ const makeStyles = (c: Palette) =>
       justifyContent: 'center',
     },
     resultatTitre: {
-      fontSize: 13,
-      fontWeight: '800',
+      fontSize: 13.5,
+      fontWeight: '600',
       color: c.green,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
     },
     infoLigne: {
       flexDirection: 'row',

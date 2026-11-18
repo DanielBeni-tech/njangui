@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TextStyle,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,16 +25,22 @@ import {
 import { useAuth } from '../store/Auth';
 
 const DUREE_RENVOI = 30;
+const GAP = 8;
 
 export default function CodeScreen() {
   const styles = useStyles(makeStyles);
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
   const params = useLocalSearchParams<{
     phoneNumber?: string;
     verificationId?: string;
     devCode?: string;
   }>();
   const numero = params.phoneNumber ?? '';
+
+  // Six cases qui tiennent sur 320 px, hauteur et largeur bornées.
+  const caseLargeur = Math.min(52, (width - 48 - GAP * 5) / 6);
+  const caseHauteur = 60;
 
   const [chiffres, setChiffres] = useState<string[]>(Array(6).fill(''));
   const [chargement, setChargement] = useState(false);
@@ -54,12 +62,18 @@ export default function CodeScreen() {
     return () => clearTimeout(minuteur);
   }, [secondes]);
 
+  // La première case prend le focus sans que l'utilisateur ait à viser.
+  useEffect(() => {
+    const minuteur = setTimeout(() => refs.current[0]?.focus(), 320);
+    return () => clearTimeout(minuteur);
+  }, []);
+
   const code = chiffres.join('');
 
   const valider = useCallback(
     async (valeur: string) => {
       if (valeur.length < 6) {
-        setErreur('Veuillez entrer le code complet');
+        setErreur('Code incomplet');
         return;
       }
       if (dernierCodeSoumis.current === valeur) return;
@@ -68,12 +82,10 @@ export default function CodeScreen() {
       setErreur(null);
       try {
         await confirmVerificationCode(verificationId ?? '', valeur);
-        toast('Connexion réussie !', 'success');
         signIn();
         router.replace('/accueil');
       } catch (e) {
-        const message =
-          e instanceof Error ? e.message : 'Code incorrect, réessayez.';
+        const message = e instanceof Error ? e.message : 'Code incorrect';
         setErreur(message);
         dernierCodeSoumis.current = '';
         setChiffres(Array(6).fill(''));
@@ -82,7 +94,7 @@ export default function CodeScreen() {
         setChargement(false);
       }
     },
-    [verificationId, signIn, toast],
+    [verificationId, signIn],
   );
 
   // Validation automatique dès que les 6 chiffres sont saisis.
@@ -106,8 +118,7 @@ export default function CodeScreen() {
           suivant[position] = chiffre;
         });
       setChiffres(suivant);
-      const dernier = Math.min(brut.length, 6) - 1;
-      refs.current[dernier]?.focus();
+      refs.current[Math.min(brut.length, 6) - 1]?.focus();
       return;
     }
 
@@ -140,9 +151,9 @@ export default function CodeScreen() {
     if (secondes > 0 || renvoiEnCours) return;
     setRenvoiEnCours(true);
     try {
-      const { verificationId, devCode: nouveau } =
+      const { verificationId: nouveauId, devCode: nouveau } =
         await sendVerificationCode(numero);
-      setVerificationId(verificationId);
+      setVerificationId(nouveauId);
       setDevCode(nouveau);
       setChiffres(Array(6).fill(''));
       setErreur(null);
@@ -151,10 +162,7 @@ export default function CodeScreen() {
       toast('Nouveau code envoyé', 'success');
       refs.current[0]?.focus();
     } catch (e) {
-      toast(
-        e instanceof Error ? e.message : 'Impossible de renvoyer le code',
-        'error',
-      );
+      toast(e instanceof Error ? e.message : 'Envoi impossible', 'error');
     } finally {
       setRenvoiEnCours(false);
     }
@@ -166,27 +174,10 @@ export default function CodeScreen() {
         style={styles.contenu}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <BackHeader title="Vérification" onPress={() => router.back()} />
+        <BackHeader title="Code reçu" onPress={() => router.back()} />
 
-        <View style={styles.etapes}>
-          <View style={styles.etapeActive} />
-          <View style={styles.etapeActive} />
-          <Text style={styles.etapeTexte}>Étape 2 sur 2</Text>
-        </View>
-
-        <View style={styles.iconeBoite}>
-          <MaterialIcons
-            name="mark-email-read"
-            size={28}
-            color={colors.purple}
-          />
-        </View>
-
-        <Text style={styles.titre}>Saisissez le code</Text>
-        <Text style={styles.sousTitre}>
-          Code à 6 chiffres envoyé au{' '}
-          <Text style={styles.numero}>{numero}</Text>
-        </Text>
+        <Text style={styles.titre}>Entrez le code</Text>
+        <Text style={styles.sousTitre}>Envoyé au {numero}</Text>
 
         <View style={styles.cases}>
           {chiffres.map((valeur, index) => (
@@ -205,11 +196,22 @@ export default function CodeScreen() {
               maxLength={6}
               keyboardType="number-pad"
               textAlign="center"
+              textAlignVertical="center"
               editable={!chargement}
               selectTextOnFocus
+              caretHidden
               accessibilityLabel={`Chiffre ${index + 1} du code`}
               style={[
                 styles.case,
+                {
+                  width: caseLargeur,
+                  height: caseHauteur,
+                  lineHeight: caseHauteur,
+                },
+                // Web : supprime le contour de focus qui décale le chiffre.
+                Platform.OS === 'web'
+                  ? ({ outlineStyle: 'none' } as unknown as TextStyle)
+                  : null,
                 focus === index && styles.caseActive,
                 valeur ? styles.caseRemplie : null,
                 erreur ? styles.caseErreur : null,
@@ -224,36 +226,20 @@ export default function CodeScreen() {
             <Text style={styles.erreur}>{erreur}</Text>
           </View>
         ) : (
-          <View style={styles.ligneInfo}>
-            <MaterialIcons
-              name="schedule"
-              size={14}
-              color={colors.textFaint}
-            />
-            <Text style={styles.info}>
-              Le code expire dans 5 minutes. Vérifiez aussi vos SMS indésirables.
-            </Text>
-          </View>
+          <Text style={styles.info}>
+            Le code expire dans 5 minutes.
+          </Text>
         )}
 
         {devCode ? (
-          <View style={styles.demo}>
-            <MaterialIcons name="science" size={16} color={colors.teal} />
-            <Text style={styles.demoTexte}>
-              Mode démo — votre code :{' '}
-              <Text style={styles.demoCode}>{devCode}</Text>
-            </Text>
-          </View>
+          <Text style={styles.demoCode}>Code de démonstration : {devCode}</Text>
         ) : null}
 
         <Pressable
           onPress={renvoyer}
           disabled={secondes > 0 || renvoiEnCours}
-          hitSlop={8}
-          style={({ pressed }) => [
-            styles.renvoyer,
-            pressed && secondes === 0 && styles.presse,
-          ]}
+          hitSlop={12}
+          style={({ pressed }) => [styles.renvoyer, pressed && styles.presse]}
         >
           <Text
             style={[
@@ -270,10 +256,10 @@ export default function CodeScreen() {
         <View style={styles.espace} />
 
         <PrimaryButton
-          label="Valider le code"
+          label="Valider"
           onPress={() => valider(code)}
           loading={chargement}
-          variant="mint"
+          variant="purple"
           rightIcon="check"
         />
       </KeyboardAvoidingView>
@@ -290,73 +276,39 @@ const makeStyles = (c: Palette) =>
     contenu: {
       flex: 1,
       paddingHorizontal: 24,
-      paddingTop: 16,
+      paddingTop: 18,
       paddingBottom: 28,
     },
-    etapes: {
-      marginTop: 26,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    etapeActive: {
-      width: 22,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: c.purple,
-    },
-    etapeTexte: {
-      marginLeft: 6,
-      fontSize: 12,
-      fontWeight: '600',
-      color: c.textFaint,
-    },
-    iconeBoite: {
-      marginTop: 24,
-      width: 56,
-      height: 56,
-      borderRadius: 18,
-      backgroundColor: c.mintSoft,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     titre: {
-      marginTop: 18,
-      fontSize: 26,
-      lineHeight: 33,
-      fontWeight: '800',
+      marginTop: 22,
+      fontSize: 24,
+      lineHeight: 30,
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.5,
     },
     sousTitre: {
       marginTop: 8,
-      fontSize: 15,
-      lineHeight: 22,
+      fontSize: 14.5,
       color: c.textMuted,
     },
-    numero: {
-      fontWeight: '700',
-      color: c.text,
-    },
     cases: {
-      marginTop: 28,
+      marginTop: 26,
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      gap: 8,
+      gap: GAP,
     },
     case: {
-      flex: 1,
-      minWidth: 0,
-      maxWidth: 52,
-      height: 58,
       borderWidth: 1.5,
       borderColor: c.border,
-      borderRadius: 14,
-      fontSize: 22,
-      fontWeight: '700',
+      borderRadius: 12,
+      padding: 0,
+      margin: 0,
+      fontSize: 23,
+      fontWeight: '600',
       color: c.text,
-      paddingVertical: 0,
       backgroundColor: c.cardMuted,
+      textAlign: 'center',
+      includeFontPadding: false,
+      textAlignVertical: 'center',
     },
     caseActive: {
       borderColor: c.purple,
@@ -375,43 +327,27 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       gap: 6,
       marginTop: 12,
-      paddingHorizontal: 2,
     },
     info: {
-      flex: 1,
-      fontSize: 12,
+      marginTop: 12,
+      fontSize: 12.5,
       color: c.textFaint,
     },
     erreur: {
-      flex: 1,
-      fontSize: 12,
-      fontWeight: '500',
+      fontSize: 12.5,
+      fontWeight: '600',
       color: c.red,
     },
-    demo: {
-      marginTop: 18,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      borderRadius: 12,
-      backgroundColor: c.tealSoft,
-    },
-    demoTexte: {
-      flex: 1,
-      fontSize: 12.5,
-      color: c.textMuted,
-    },
     demoCode: {
-      fontWeight: '800',
-      color: c.teal,
-      letterSpacing: 1,
+      marginTop: 14,
+      fontSize: 12.5,
+      color: c.textFaint,
+      fontVariant: ['tabular-nums'],
     },
     renvoyer: {
       marginTop: 18,
-      alignSelf: 'center',
-      paddingVertical: 4,
+      alignSelf: 'flex-start',
+      paddingVertical: 6,
     },
     presse: {
       opacity: 0.6,

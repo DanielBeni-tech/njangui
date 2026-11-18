@@ -332,9 +332,9 @@ const makeStyles = (c: Palette) =>
     montant: {
       marginTop: 6,
       fontSize: 30,
-      fontWeight: '800',
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.8,
+      letterSpacing: 0,
     },
     frequence: {
       marginTop: 2,
@@ -386,7 +386,7 @@ const makeStyles = (c: Palette) =>
     code: {
       marginTop: 6,
       fontSize: 22,
-      fontWeight: '800',
+      fontWeight: '700',
       letterSpacing: 5,
       color: c.green,
     },
@@ -458,7 +458,7 @@ const makeStyles = (c: Palette) =>
     },
     section: {
       fontSize: 17,
-      fontWeight: '800',
+      fontWeight: '700',
       color: c.text,
     },
     sectionNote: {
@@ -496,7 +496,7 @@ const makeStyles = (c: Palette) =>
     },
     membreInitiale: {
       fontSize: 16,
-      fontWeight: '800',
+      fontWeight: '700',
     },
     membreTexte: {
       flex: 1,

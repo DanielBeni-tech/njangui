@@ -13,7 +13,9 @@ import { dark, light, Palette } from '../theme';
 export type ThemeMode = 'light' | 'dark' | 'system';
 type Scheme = 'light' | 'dark';
 
-const CLE = 'njangi.theme.mode';
+const CLE = 'njangui.theme.mode';
+/** Clé de l'ancienne version, lue une seule fois pour ne pas perdre le choix. */
+const ANCIENNE_CLE = 'njangi.theme.mode';
 
 type ThemeValue = {
   mode: ThemeMode;
@@ -32,6 +34,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let actif = true;
     AsyncStorage.getItem(CLE)
+      .catch(() => null)
+      .then((stocke) => stocke ?? AsyncStorage.getItem(ANCIENNE_CLE).catch(() => null))
       .then((valeur) => {
         if (!actif) return;
         if (valeur === 'light' || valeur === 'dark' || valeur === 'system') {

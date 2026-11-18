@@ -16,32 +16,12 @@ export default function AlertesScreen() {
 
   const META: Record<
     TypeNotification,
-    {
-      icone: keyof typeof MaterialIcons.glyphMap;
-      couleur: string;
-      fond: string;
-    }
+    { icone: keyof typeof MaterialIcons.glyphMap; couleur: string }
   > = {
-    nouvelleTontine: {
-      icone: 'group-add',
-      couleur: colors.green,
-      fond: colors.greenSoft,
-    },
-    nouveauMembre: {
-      icone: 'person-add',
-      couleur: colors.purple,
-      fond: colors.purpleSoft,
-    },
-    retardContribution: {
-      icone: 'warning-amber',
-      couleur: colors.red,
-      fond: colors.redSoft,
-    },
-    nouveauDepot: {
-      icone: 'payments',
-      couleur: colors.blue,
-      fond: colors.blueSoft,
-    },
+    nouvelleTontine: { icone: 'group-add', couleur: colors.green },
+    nouveauMembre: { icone: 'person-add', couleur: colors.purple },
+    retardContribution: { icone: 'warning-amber', couleur: colors.red },
+    nouveauDepot: { icone: 'payments', couleur: colors.blue },
   };
 
   const renderItem = ({ item }: { item: NotificationModel }) => {
@@ -49,15 +29,9 @@ export default function AlertesScreen() {
     return (
       <Pressable
         onPress={() => marquerCommeLue(item.id)}
-        style={({ pressed }) => [
-          styles.tuile,
-          !item.lu && styles.tuileNonLue,
-          pressed && styles.presse,
-        ]}
+        style={({ pressed }) => [styles.ligne, pressed && styles.presse]}
       >
-        <View style={[styles.iconeRond, { backgroundColor: meta.fond }]}>
-          <MaterialIcons name={meta.icone} size={20} color={meta.couleur} />
-        </View>
+        <MaterialIcons name={meta.icone} size={19} color={meta.couleur} />
 
         <View style={styles.texteZone}>
           <View style={styles.ligneTitre}>
@@ -74,7 +48,7 @@ export default function AlertesScreen() {
           </Text>
         </View>
 
-        {!item.lu ? <View style={styles.pointRouge} /> : null}
+        {!item.lu ? <View style={styles.point} /> : null}
       </Pressable>
     );
   };
@@ -82,23 +56,14 @@ export default function AlertesScreen() {
   return (
     <SafeAreaView style={styles.ecran} edges={['top']}>
       <View style={styles.entete}>
-        <View>
-          <Text style={styles.titreEcran}>Notifications</Text>
-          <Text style={styles.sousTitre}>
-            {nonLues > 0 ? `${nonLues} non lue(s)` : 'Tout est à jour'}
-          </Text>
-        </View>
+        <Text style={styles.titreEcran}>Alertes</Text>
         {nonLues > 0 ? (
           <Pressable
             onPress={marquerToutesCommeLues}
-            hitSlop={8}
-            style={({ pressed }) => [
-              styles.toutLire,
-              pressed && styles.presse,
-            ]}
+            hitSlop={10}
+            style={({ pressed }) => pressed && styles.presse}
           >
-            <MaterialIcons name="done-all" size={16} color={colors.purple} />
-            <Text style={styles.toutLireTexte}>Tout lire</Text>
+            <Text style={styles.toutLire}>Tout lire</Text>
           </Pressable>
         ) : null}
       </View>
@@ -109,17 +74,17 @@ export default function AlertesScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.liste}
         showsVerticalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View style={styles.separateur} />}
         ListEmptyComponent={
           <View style={styles.vide}>
             <MaterialIcons
               name="notifications-none"
-              size={54}
+              size={40}
               color={colors.textFaint}
             />
-            <Text style={styles.videTitre}>Aucune notification</Text>
+            <Text style={styles.videTitre}>Rien pour l’instant</Text>
             <Text style={styles.videTexte}>
-              Les dépôts, retards et nouveaux membres apparaîtront ici — et sur
-              votre téléphone.
+              Dépôts, retards et nouveaux membres s’afficheront ici.
             </Text>
           </View>
         }
@@ -139,66 +104,39 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: screenPadding,
-      paddingTop: 18,
+      paddingTop: 20,
     },
     titreEcran: {
-      fontSize: 24,
-      fontWeight: '800',
+      fontSize: 23,
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.5,
-    },
-    sousTitre: {
-      marginTop: 3,
-      fontSize: 12.5,
-      color: c.textFaint,
     },
     toutLire: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 20,
-      backgroundColor: c.purpleSoft,
-    },
-    toutLireTexte: {
-      fontSize: 12.5,
-      fontWeight: '700',
+      fontSize: 13,
+      fontWeight: '600',
       color: c.purple,
     },
     presse: {
-      opacity: 0.78,
+      opacity: 0.7,
     },
     liste: {
       paddingHorizontal: screenPadding,
-      paddingTop: 18,
+      paddingTop: 8,
       paddingBottom: 24,
       flexGrow: 1,
     },
-    tuile: {
+    ligne: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      marginBottom: 10,
-      padding: 14,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: c.border,
-      backgroundColor: c.card,
+      gap: 12,
+      paddingVertical: 14,
     },
-    tuileNonLue: {
-      borderColor: c.purpleSoft,
-      backgroundColor: c.backgroundAlt,
-    },
-    iconeRond: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
+    separateur: {
+      height: 1,
+      backgroundColor: c.border,
     },
     texteZone: {
       flex: 1,
-      marginLeft: 12,
     },
     ligneTitre: {
       flexDirection: 'row',
@@ -208,12 +146,11 @@ const makeStyles = (c: Palette) =>
     titre: {
       flex: 1,
       fontSize: 14.5,
-      fontWeight: '500',
       color: c.text,
       marginRight: 8,
     },
     titreNonLu: {
-      fontWeight: '800',
+      fontWeight: '600',
     },
     temps: {
       fontSize: 11.5,
@@ -225,29 +162,28 @@ const makeStyles = (c: Palette) =>
       lineHeight: 18,
       color: c.textMuted,
     },
-    pointRouge: {
-      width: 8,
-      height: 8,
+    point: {
+      width: 7,
+      height: 7,
       borderRadius: 4,
-      backgroundColor: c.red,
-      marginLeft: 8,
-      marginTop: 6,
+      backgroundColor: c.purple,
+      marginTop: 7,
     },
     vide: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingTop: 90,
+      paddingTop: 80,
       paddingHorizontal: 30,
     },
     videTitre: {
-      marginTop: 14,
+      marginTop: 12,
       fontSize: 15,
-      fontWeight: '700',
+      fontWeight: '600',
       color: c.text,
     },
     videTexte: {
-      marginTop: 6,
+      marginTop: 5,
       fontSize: 13,
       lineHeight: 19,
       color: c.textMuted,

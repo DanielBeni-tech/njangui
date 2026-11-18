@@ -34,21 +34,19 @@ export default function ProfilScreen() {
 
   const InfoTile = ({ icone, titre, valeur }: InfoTileProps) => (
     <View style={styles.info}>
-      <MaterialIcons name={icone} size={20} color={colors.purple} />
-      <View style={styles.infoTexte}>
-        <Text style={styles.infoTitre}>{titre}</Text>
-        <Text style={styles.infoValeur}>{valeur}</Text>
-      </View>
+      <MaterialIcons name={icone} size={18} color={colors.textFaint} />
+      <Text style={styles.infoTitre}>{titre}</Text>
+      <Text style={styles.infoValeur}>{valeur}</Text>
     </View>
   );
 
   const etatNotifications =
     Platform.OS === 'web'
-      ? 'Les notifications système demandent l’app mobile.'
+      ? 'Disponibles dans l’application mobile'
       : permission === 'granted'
         ? 'Autorisées sur ce téléphone'
         : permission === 'denied'
-          ? 'Refusées — activez-les dans les réglages du téléphone'
+          ? 'Refusées — à réactiver dans les réglages'
           : permission === 'unsupported'
             ? 'Non disponibles sur cet appareil'
             : 'Autorisation en attente';
@@ -63,7 +61,7 @@ export default function ProfilScreen() {
     }
     const envoye = await envoyerTest();
     toast(
-      envoye ? 'Notification envoyée' : 'Impossible d’envoyer la notification',
+      envoye ? 'Notification envoyée' : 'Envoi impossible',
       envoye ? 'success' : 'error',
     );
   };
@@ -74,62 +72,37 @@ export default function ProfilScreen() {
         contentContainerStyle={styles.contenu}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.titre}>Mon profil</Text>
-
-        <View style={styles.avatarZone}>
+        <View style={styles.identite}>
           <View style={styles.avatar}>
-            <MaterialIcons name="person" size={64} color={colors.onMint} />
+            <MaterialIcons name="person" size={38} color={colors.onMint} />
           </View>
-          <View style={styles.boutonPhoto}>
-            <MaterialIcons name="edit" size={15} color={colors.onAccent} />
+          <View style={styles.identiteTexte}>
+            <Text style={styles.nom}>Mégane Dupont</Text>
+            <Text style={styles.numero}>+237 658 834 387</Text>
           </View>
         </View>
 
-        <Text style={styles.nom}>Mégane</Text>
-        <Text style={styles.numero}>+237 658 834 387</Text>
-
         <View style={styles.carteInfos}>
           <InfoTile
-            icone="person-outline"
-            titre="Nom complet"
-            valeur="Mégane Dupont"
-          />
-          <View style={styles.separateur} />
-          <InfoTile
-            icone="phone"
-            titre="Téléphone"
-            valeur="+237 658 834 387"
-          />
-          <View style={styles.separateur} />
-          <InfoTile
-            icone="calendar-today"
-            titre="Membre depuis"
-            valeur="Janvier 2024"
-          />
-          <View style={styles.separateur} />
-          <InfoTile
             icone="groups"
-            titre="Tontines actives"
+            titre="Tontines"
             valeur={String(tontines.length)}
           />
+          <View style={styles.separateur} />
+          <InfoTile icone="calendar-today" titre="Membre depuis" valeur="Janvier 2024" />
         </View>
 
         <Text style={styles.sectionTitre}>Apparence</Text>
         <View style={styles.carte}>
           <View style={styles.ligneTitre}>
-            <View style={styles.ligneIcone}>
-              <MaterialIcons
-                name={scheme === 'dark' ? 'dark-mode' : 'light-mode'}
-                size={18}
-                color={colors.purple}
-              />
-            </View>
-            <View style={styles.ligneTexte}>
-              <Text style={styles.ligneTitreTexte}>Thème de l’application</Text>
-              <Text style={styles.ligneSousTitre}>
-                {scheme === 'dark' ? 'Sombre' : 'Clair'} actuellement
-              </Text>
-            </View>
+            <MaterialIcons
+              name={scheme === 'dark' ? 'dark-mode' : 'light-mode'}
+              size={18}
+              color={colors.textMuted}
+            />
+            <Text style={styles.ligneTitreTexte}>
+              {scheme === 'dark' ? 'Sombre' : 'Clair'}
+            </Text>
           </View>
           <ThemeSwitch />
         </View>
@@ -137,13 +110,11 @@ export default function ProfilScreen() {
         <Text style={styles.sectionTitre}>Notifications</Text>
         <View style={styles.carte}>
           <View style={styles.ligneTitre}>
-            <View style={styles.ligneIcone}>
-              <MaterialIcons
-                name="notifications-active"
-                size={18}
-                color={colors.purple}
-              />
-            </View>
+            <MaterialIcons
+              name="notifications-none"
+              size={18}
+              color={colors.textMuted}
+            />
             <View style={styles.ligneTexte}>
               <Text style={styles.ligneTitreTexte}>Alertes sur le téléphone</Text>
               <Text style={styles.ligneSousTitre}>{etatNotifications}</Text>
@@ -160,32 +131,21 @@ export default function ProfilScreen() {
                   }
                 });
               }}
-              trackColor={{ false: colors.border, true: colors.mint }}
-              thumbColor={enabled ? colors.green : colors.card}
+              trackColor={{ false: colors.border, true: colors.greenSolid }}
+              thumbColor={colors.card}
               accessibilityLabel="Activer les notifications"
             />
           </View>
 
-          <Pressable
-            onPress={test}
-            style={({ pressed }) => [
-              styles.test,
-              pressed && styles.presse,
-            ]}
-          >
-            <MaterialIcons
-              name="campaign"
-              size={17}
-              color={colors.purple}
-            />
-            <Text style={styles.testTexte}>Envoyer une notification de test</Text>
-          </Pressable>
+          {Platform.OS !== 'web' ? (
+            <Pressable
+              onPress={test}
+              style={({ pressed }) => [styles.test, pressed && styles.presse]}
+            >
+              <Text style={styles.testTexte}>Envoyer un test</Text>
+            </Pressable>
+          ) : null}
         </View>
-
-        <Text style={styles.note}>
-          Mode démo : les alertes sont générées dans l’application, mais la
-          notification s’affiche réellement sur votre téléphone.
-        </Text>
 
         <Pressable
           onPress={signOut}
@@ -194,7 +154,6 @@ export default function ProfilScreen() {
             pressed && { opacity: 0.85 },
           ]}
         >
-          <MaterialIcons name="logout" size={20} color={colors.onAccent} />
           <Text style={styles.deconnexionTexte}>Se déconnecter</Text>
         </Pressable>
       </ScrollView>
@@ -210,77 +169,57 @@ const makeStyles = (c: Palette) =>
     },
     contenu: {
       paddingHorizontal: screenPadding,
-      paddingTop: 18,
+      paddingTop: 26,
       paddingBottom: 32,
+    },
+    identite: {
+      flexDirection: 'row',
       alignItems: 'center',
     },
-    titre: {
-      fontSize: 24,
-      fontWeight: '800',
-      color: c.text,
-      letterSpacing: -0.5,
-    },
-    avatarZone: {
-      marginTop: 24,
-      width: 108,
-      height: 108,
-    },
     avatar: {
-      width: 108,
-      height: 108,
-      borderRadius: 54,
+      width: 64,
+      height: 64,
+      borderRadius: 32,
       backgroundColor: c.mint,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    boutonPhoto: {
-      position: 'absolute',
-      bottom: 2,
-      right: 2,
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: c.purpleSolid,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: c.background,
+    identiteTexte: {
+      marginLeft: 14,
+      flex: 1,
     },
     nom: {
-      marginTop: 14,
-      fontSize: 21,
-      fontWeight: '800',
+      fontSize: 19,
+      fontWeight: '700',
       color: c.text,
     },
     numero: {
-      marginTop: 4,
-      fontSize: 14,
-      color: c.textFaint,
+      marginTop: 3,
+      fontSize: 13.5,
+      color: c.textMuted,
     },
     carteInfos: {
-      alignSelf: 'stretch',
-      marginTop: 24,
+      marginTop: 22,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
-      borderRadius: 18,
       backgroundColor: c.card,
       paddingHorizontal: 14,
+      paddingVertical: 4,
     },
     info: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 13,
-    },
-    infoTexte: {
-      marginLeft: 14,
+      gap: 10,
+      paddingVertical: 12,
     },
     infoTitre: {
-      fontSize: 11.5,
-      color: c.textFaint,
+      flex: 1,
+      fontSize: 13.5,
+      color: c.textMuted,
     },
     infoValeur: {
-      marginTop: 1,
-      fontSize: 14.5,
+      fontSize: 13.5,
       fontWeight: '600',
       color: c.text,
     },
@@ -289,20 +228,18 @@ const makeStyles = (c: Palette) =>
       backgroundColor: c.border,
     },
     sectionTitre: {
-      alignSelf: 'flex-start',
-      marginTop: 26,
+      marginTop: 24,
       marginBottom: 10,
-      fontSize: 13,
-      fontWeight: '700',
-      color: c.textMuted,
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.textFaint,
       textTransform: 'uppercase',
-      letterSpacing: 0.6,
+      letterSpacing: 0.8,
     },
     carte: {
-      alignSelf: 'stretch',
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
-      borderRadius: 18,
       backgroundColor: c.card,
       padding: 14,
       gap: 12,
@@ -310,22 +247,15 @@ const makeStyles = (c: Palette) =>
     ligneTitre: {
       flexDirection: 'row',
       alignItems: 'center',
-    },
-    ligneIcone: {
-      width: 36,
-      height: 36,
-      borderRadius: 12,
-      backgroundColor: c.purpleSoft,
-      alignItems: 'center',
-      justifyContent: 'center',
+      gap: 10,
     },
     ligneTexte: {
       flex: 1,
-      marginLeft: 12,
     },
     ligneTitreTexte: {
-      fontSize: 14,
-      fontWeight: '700',
+      flex: 1,
+      fontSize: 14.5,
+      fontWeight: '600',
       color: c.text,
     },
     ligneSousTitre: {
@@ -335,43 +265,29 @@ const makeStyles = (c: Palette) =>
       color: c.textMuted,
     },
     test: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      paddingVertical: 11,
-      borderRadius: 14,
-      backgroundColor: c.purpleSoft,
+      alignSelf: 'flex-start',
+      paddingVertical: 6,
     },
     testTexte: {
       fontSize: 13,
-      fontWeight: '700',
+      fontWeight: '600',
       color: c.purple,
     },
     presse: {
-      opacity: 0.75,
-    },
-    note: {
-      alignSelf: 'stretch',
-      marginTop: 14,
-      fontSize: 11.5,
-      lineHeight: 17,
-      color: c.textFaint,
+      opacity: 0.7,
     },
     deconnexion: {
-      marginTop: 24,
-      alignSelf: 'stretch',
-      height: 54,
-      borderRadius: 30,
-      backgroundColor: c.redDark,
-      flexDirection: 'row',
+      marginTop: 26,
+      height: 50,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.border,
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
     },
     deconnexionTexte: {
-      fontSize: 15,
+      fontSize: 14.5,
       fontWeight: '600',
-      color: c.onAccent,
+      color: c.red,
     },
   });

@@ -43,7 +43,7 @@ export function ThemeSwitch({ compact = false }: Props) {
           >
             <MaterialIcons
               name={option.icone}
-              size={16}
+              size={18}
               color={actif ? colors.onAccent : colors.textMuted}
             />
             {compact ? null : (
@@ -67,8 +67,8 @@ const makeStyles = (c: Palette) =>
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: c.cardMuted,
-      borderRadius: 30,
-      padding: 4,
+      borderRadius: 12,
+      padding: 3,
       gap: 4,
     },
     segment: {
@@ -79,12 +79,13 @@ const makeStyles = (c: Palette) =>
       gap: 6,
       paddingVertical: 9,
       paddingHorizontal: 10,
-      borderRadius: 26,
+      borderRadius: 10,
     },
     segmentCompact: {
       flex: 0,
-      paddingHorizontal: 9,
-      paddingVertical: 8,
+      minWidth: 44,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
     },
     segmentActif: {
       backgroundColor: c.purpleSolid,

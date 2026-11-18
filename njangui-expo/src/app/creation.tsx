@@ -120,7 +120,7 @@ export default function CreationScreen() {
         />
 
         <Text style={styles.entete}>
-          Définissez les règles une fois : l’application les applique pour vous.
+          Définissez les règles : elles s’appliquent automatiquement.
         </Text>
 
         <Pressable
@@ -289,9 +289,9 @@ const makeStyles = (c: Palette) =>
     valeur: {
       marginTop: 12,
       fontSize: 22,
-      fontWeight: '800',
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.4,
+      letterSpacing: 0,
     },
     radios: {
       marginTop: 12,

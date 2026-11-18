@@ -167,7 +167,7 @@ const makeStyles = (c: Palette) =>
       fontSize: 17,
       fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.2,
+      letterSpacing: 0,
     },
     montant: {
       marginTop: 4,

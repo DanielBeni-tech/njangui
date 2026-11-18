@@ -10,24 +10,6 @@ import { PrimaryButton } from '../ui/PrimaryButton';
 import { useToast } from '../ui/Toast';
 import { sendVerificationCode } from '../services/auth';
 
-const POINTS = [
-  {
-    icone: 'sms' as const,
-    titre: 'Réception immédiate',
-    texte: 'Le code arrive par SMS, même sans connexion internet.',
-  },
-  {
-    icone: 'timer' as const,
-    titre: 'Valable 5 minutes',
-    texte: 'Passé ce délai, demandez simplement un nouveau code.',
-  },
-  {
-    icone: 'shield' as const,
-    titre: 'Numéro protégé',
-    texte: 'Votre numéro sert uniquement à sécuriser votre compte.',
-  },
-];
-
 export default function VerificationScreen() {
   const styles = useStyles(makeStyles);
   const { colors } = useTheme();
@@ -59,29 +41,16 @@ export default function VerificationScreen() {
       <View style={styles.contenu}>
         <BackHeader title="Vérification" onPress={() => router.back()} />
 
-        <View style={styles.etapes}>
-          <View style={styles.etapeActive} />
-          <View style={styles.etapeInactive} />
-          <Text style={styles.etapeTexte}>Étape 1 sur 2</Text>
-        </View>
-
-        <Text style={styles.titre}>Vérifions votre numéro</Text>
+        <Text style={styles.titre}>Confirmez ce numéro</Text>
         <Text style={styles.sousTitre}>
-          Nous allons envoyer un code à 6 chiffres pour confirmer que ce numéro
-          vous appartient.
+          Le code arrive par SMS et reste valable 5 minutes.
         </Text>
 
         <View style={styles.carteNumero}>
-          <View style={styles.avatar}>
-            <MaterialIcons name="smartphone" size={24} color={colors.purple} />
-          </View>
-          <View style={styles.numeroBloc}>
-            <Text style={styles.numeroLabel}>Numéro saisi</Text>
-            <Text style={styles.numero}>{numero}</Text>
-          </View>
+          <Text style={styles.numero}>{numero}</Text>
           <Pressable
             onPress={() => router.back()}
-            hitSlop={10}
+            hitSlop={12}
             accessibilityLabel="Modifier le numéro"
             style={({ pressed }) => [styles.modifier, pressed && styles.presse]}
           >
@@ -90,31 +59,13 @@ export default function VerificationScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.liste}>
-          {POINTS.map((point) => (
-            <View key={point.titre} style={styles.ligne}>
-              <View style={styles.ligneIcone}>
-                <MaterialIcons
-                  name={point.icone}
-                  size={18}
-                  color={colors.green}
-                />
-              </View>
-              <View style={styles.ligneTexte}>
-                <Text style={styles.ligneTitre}>{point.titre}</Text>
-                <Text style={styles.ligneSousTitre}>{point.texte}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
         <View style={styles.espace} />
 
         <PrimaryButton
           label="Recevoir le code"
           onPress={envoyerCode}
           loading={chargement}
-          variant="mint"
+          variant="purple"
           rightIcon="arrow-forward"
         />
         <Text style={styles.note}>
@@ -134,133 +85,59 @@ const makeStyles = (c: Palette) =>
     contenu: {
       flex: 1,
       paddingHorizontal: 24,
-      paddingTop: 16,
+      paddingTop: 18,
       paddingBottom: 28,
     },
-    etapes: {
-      marginTop: 26,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    etapeActive: {
-      width: 28,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: c.purple,
-    },
-    etapeInactive: {
-      width: 16,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: c.border,
-    },
-    etapeTexte: {
-      marginLeft: 6,
-      fontSize: 12,
-      fontWeight: '600',
-      color: c.textFaint,
-    },
     titre: {
-      marginTop: 20,
-      fontSize: 26,
-      lineHeight: 33,
-      fontWeight: '800',
+      marginTop: 22,
+      fontSize: 24,
+      lineHeight: 30,
+      fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.5,
     },
     sousTitre: {
-      marginTop: 10,
-      fontSize: 15,
-      lineHeight: 22,
+      marginTop: 8,
+      fontSize: 14.5,
+      lineHeight: 21,
       color: c.textMuted,
     },
     carteNumero: {
-      marginTop: 24,
+      marginTop: 22,
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 14,
-      borderRadius: 18,
-      backgroundColor: c.mintSoft,
+      justifyContent: 'space-between',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
-    },
-    avatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 14,
-      backgroundColor: c.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    numeroBloc: {
-      flex: 1,
-      marginLeft: 12,
-    },
-    numeroLabel: {
-      fontSize: 10.5,
-      fontWeight: '700',
-      color: c.textFaint,
-      textTransform: 'uppercase',
-      letterSpacing: 0.6,
+      backgroundColor: c.cardMuted,
     },
     numero: {
-      marginTop: 3,
       fontSize: 17,
-      fontWeight: '700',
+      fontWeight: '600',
       color: c.text,
+      letterSpacing: 0.3,
     },
     modifier: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: 10,
-      paddingVertical: 7,
-      borderRadius: 20,
-      backgroundColor: c.card,
+      gap: 5,
+      paddingVertical: 6,
+      paddingHorizontal: 4,
     },
     presse: {
-      opacity: 0.65,
+      opacity: 0.6,
     },
     modifierTexte: {
-      fontSize: 12,
+      fontSize: 12.5,
       fontWeight: '600',
       color: c.purple,
     },
-    liste: {
-      marginTop: 26,
-      gap: 18,
-    },
-    ligne: {
-      flexDirection: 'row',
-    },
-    ligneIcone: {
-      width: 34,
-      height: 34,
-      borderRadius: 11,
-      backgroundColor: c.greenSoft,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    ligneTexte: {
-      flex: 1,
-      marginLeft: 12,
-    },
-    ligneTitre: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: c.text,
-    },
-    ligneSousTitre: {
-      marginTop: 2,
-      fontSize: 12.5,
-      lineHeight: 18,
-      color: c.textFaint,
-    },
     espace: { flex: 1, minHeight: 24 },
     note: {
-      marginTop: 14,
-      fontSize: 11,
+      marginTop: 12,
+      fontSize: 11.5,
       color: c.textFaint,
       textAlign: 'center',
     },

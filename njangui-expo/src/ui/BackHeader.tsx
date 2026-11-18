@@ -58,6 +58,6 @@ const makeStyles = (c: Palette) =>
       fontSize: 19,
       fontWeight: '700',
       color: c.text,
-      letterSpacing: -0.2,
+      letterSpacing: 0,
     },
   });

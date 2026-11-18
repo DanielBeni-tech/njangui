@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Njangi",
-    "slug": "njangi",
+    "name": "Njangui",
+    "slug": "njangui",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,7 +11,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#F3F7F5",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -19,13 +19,13 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/brand/favicon-48.png"
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "expo-notifications"
     ],
-    "scheme": "njangi"
+    "scheme": "njangui"
   }
 }

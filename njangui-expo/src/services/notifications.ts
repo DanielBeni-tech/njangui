@@ -1,8 +1,8 @@
 /**
  * Notifications locales (aucun serveur push nécessaire).
  *
- * Les actions de la démo (tontine créée, membre ajouté, dépôt, retard) sont
- * déclenchées dans l'application : elles produisent donc une vraie
+ * Les actions de l'application (tontine créée, membre ajouté, dépôt, retard)
+ * sont déclenchées localement : elles produisent donc une vraie
  * notification système sur le téléphone — bannière + centre de notifications.
  *
  * `expo-notifications` n'existe pas sur le web : le module est chargé
@@ -41,7 +41,7 @@ function getApi(): NotificationsApi | null {
 async function creerCanal(n: NotificationsApi) {
   if (Platform.OS !== 'android') return;
   await n.setNotificationChannelAsync(CANAL, {
-    name: 'Notifications Njangi',
+    name: 'Notifications Njangui',
     description: 'Tontines, dépôts et rappels de contribution',
     importance: n.AndroidImportance.HIGH,
     vibrationPattern: [0, 220, 180, 220],
@@ -105,7 +105,7 @@ export async function notifyLocal(titre: string, message: string): Promise<boole
   }
 }
 
-/** Rappel programmé (ex. prochaine échéance), conservé pour la démo. */
+/** Rappel programmé (ex. prochaine échéance). */
 export async function planifierRappel(
   titre: string,
   message: string,

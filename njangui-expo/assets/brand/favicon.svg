@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none"><style>
+      .plate { fill: #F3F7F5; }
+      .a { fill: #6E2B7C; }
+      .b { fill: #2A8390; }
+      .c { fill: #2E8F68; }
+      .d { fill: #B8862E; }
+      @media (prefers-color-scheme: dark) {
+        .plate { fill: #0F1412; }
+        .a { fill: #C9A2D9; }
+        .b { fill: #6EC5D2; }
+        .c { fill: #5FCB9B; }
+        .d { fill: #E0AE5C; }
+      }
+    </style><rect class="plate" width="64" height="64" rx="14"/><g class="a" transform="translate(32.00 17.40) rotate(-180.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="b" transform="translate(42.32 21.68) rotate(-135.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="c" transform="translate(46.60 32.00) rotate(-90.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="d" transform="translate(42.32 42.32) rotate(-45.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="a" transform="translate(32.00 46.60) rotate(0.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="b" transform="translate(21.68 42.32) rotate(45.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="c" transform="translate(17.40 32.00) rotate(90.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g><g class="d" transform="translate(21.68 21.68) rotate(135.0)"><path d="M -3.05 -2.5 L 3.05 -2.5 Q 5 -2.5 5 0.2 L 5 2.3 L -5 2.3 L -5 0.2 Q -5 -2.5 -3.05 -2.5 Z"/><circle cy="4.6" r="3.2"/></g></svg>
