@@ -346,9 +346,12 @@ const styles = StyleSheet.create({
     marginTop: 30,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 8,
   },
   case: {
-    width: 48,
+    flex: 1,
+    minWidth: 0,
+    maxWidth: 52,
     height: 58,
     borderWidth: 1.5,
     borderColor: colors.border,
