@@ -4,17 +4,19 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../store/Auth';
 import { AppDataProvider } from '../store/AppData';
+import { ThemeProvider, useTheme } from '../store/Theme';
+import { NotificationsProvider } from '../store/Notifications';
 import { ToastProvider } from '../ui/Toast';
-import { colors } from '../theme';
 
 function Routes() {
   const { signedIn } = useAuth();
+  const { colors } = useTheme();
 
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.white },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Protected guard={!signedIn}>
@@ -33,17 +35,31 @@ function Routes() {
   );
 }
 
+function ThemedApp() {
+  const { scheme } = useTheme();
+
+  return (
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <AuthProvider>
+        <ToastProvider>
+          <NotificationsProvider>
+            <AppDataProvider>
+              <Routes />
+            </AppDataProvider>
+          </NotificationsProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </>
+  );
+}
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <AppDataProvider>
-          <ToastProvider>
-            <StatusBar style="dark" />
-            <Routes />
-          </ToastProvider>
-        </AppDataProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

@@ -10,9 +10,10 @@ import {
   ViewStyle,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { Palette } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 
-type Variant = 'mint' | 'green' | 'purple' | 'danger';
+type Variant = 'mint' | 'green' | 'purple' | 'danger' | 'ghost';
 
 type Props = {
   label: string;
@@ -27,13 +28,6 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-const FOND: Record<Variant, string> = {
-  mint: colors.mint,
-  green: colors.green,
-  purple: colors.purple,
-  danger: '#E53935',
-};
-
 export function PrimaryButton({
   label,
   onPress,
@@ -46,16 +40,34 @@ export function PrimaryButton({
   labelStyle,
   style,
 }: Props) {
-  const couleurTexte = variant === 'mint' ? colors.text : colors.white;
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
+
+  const fond: Record<Variant, string> = {
+    mint: colors.mint,
+    green: colors.greenSolid,
+    purple: colors.purpleSolid,
+    danger: colors.redDark,
+    ghost: colors.cardMuted,
+  };
+  const couleurTexte =
+    variant === 'mint'
+      ? colors.onMint
+      : variant === 'ghost'
+        ? colors.text
+        : colors.onAccent;
+
   const inactif = disabled || loading;
 
   return (
     <Pressable
       onPress={onPress}
       disabled={inactif}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: inactif, busy: loading }}
       style={({ pressed }) => [
         styles.base,
-        { backgroundColor: FOND[variant], height },
+        { backgroundColor: fond[variant], height },
         inactif && styles.inactif,
         pressed && !inactif && styles.presse,
         style,
@@ -90,32 +102,38 @@ export function PrimaryButton({
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    width: '100%',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  contenu: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  iconeGauche: {
-    marginRight: 8,
-  },
-  iconeDroite: {
-    marginLeft: 10,
-  },
-  inactif: {
-    opacity: 0.6,
-  },
-  presse: {
-    opacity: 0.85,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    base: {
+      width: '100%',
+      borderRadius: 30,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: c.shadow,
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+    },
+    contenu: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    iconeGauche: {
+      marginRight: 8,
+    },
+    iconeDroite: {
+      marginLeft: 10,
+    },
+    inactif: {
+      opacity: 0.55,
+    },
+    presse: {
+      opacity: 0.88,
+    },
+  });

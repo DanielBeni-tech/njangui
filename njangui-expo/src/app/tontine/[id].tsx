@@ -1,16 +1,11 @@
 import React from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { router, useLocalSearchParams } from 'expo-router';
-import { colors, screenPadding } from '../../theme';
+import { Palette, screenPadding } from '../../theme';
+import { useStyles, useTheme } from '../../store/Theme';
 import { BackHeader } from '../../ui/BackHeader';
 import { PrimaryButton } from '../../ui/PrimaryButton';
 import { useToast } from '../../ui/Toast';
@@ -19,6 +14,8 @@ import { Membre } from '../../types';
 import { formatDateCourte, formatMontant } from '../../utils/format';
 
 export default function DetailTontineScreen() {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     findTontineById,
@@ -34,6 +31,11 @@ export default function DetailTontineScreen() {
     return (
       <SafeAreaView style={styles.ecran} edges={['top', 'bottom']}>
         <View style={styles.introuvable}>
+          <MaterialIcons
+            name="search-off"
+            size={44}
+            color={colors.textFaint}
+          />
           <Text style={styles.introuvableTexte}>Tontine introuvable</Text>
           <PrimaryButton
             label="Retour"
@@ -67,6 +69,11 @@ export default function DetailTontineScreen() {
     );
   };
 
+  const payes = tontine.membres.filter((m) => m.aPaye).length;
+  const total = tontine.membres.length;
+  const ratio = total === 0 ? 0 : payes / total;
+  const collecte = payes * tontine.montant;
+
   return (
     <SafeAreaView style={styles.ecran} edges={['top', 'bottom']}>
       <ScrollView
@@ -76,239 +83,489 @@ export default function DetailTontineScreen() {
       >
         <BackHeader title={tontine.nom} onPress={() => router.back()} />
 
-        <View style={styles.carte}>
-          <Text style={styles.libelle}>Montant</Text>
+        <View
+          style={[
+            styles.etatLigne,
+            {
+              backgroundColor: tontine.enCours
+                ? colors.greenSoft
+                : colors.purpleSoft,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.point,
+              {
+                backgroundColor: tontine.enCours
+                  ? colors.green
+                  : colors.purple,
+              },
+            ]}
+          />
+          <Text
+            style={[
+              styles.etatTexte,
+              { color: tontine.enCours ? colors.green : colors.purple },
+            ]}
+          >
+            {tontine.enCours ? 'Tontine en cours' : 'Tontine à venir'}
+          </Text>
+        </View>
+
+        <View style={styles.carteMontant}>
+          <Text style={styles.libelle}>Cotisation</Text>
           <Text style={styles.montant}>
             {formatMontant(tontine.montant)} FCFA
           </Text>
-        </View>
+          <Text style={styles.frequence}>par {tontine.frequence}</Text>
 
-        <View style={styles.carte}>
-          <View style={styles.gestionnaireLigne}>
-            <View>
-              <Text style={styles.libelle}>Gestionnaire</Text>
-              <Text style={styles.gestionnaire}>{tontine.gestionnaire}</Text>
-            </View>
-            <View style={styles.avatar}>
-              <MaterialIcons name="person" size={35} color={colors.white} />
-            </View>
+          <View style={styles.progressionLigne}>
+            <Text style={styles.progressionTexte}>
+              {payes}/{total} membres ont payé
+            </Text>
+            <Text style={styles.progressionMontant}>
+              {formatMontant(collecte)} FCFA
+            </Text>
+          </View>
+          <View style={styles.piste}>
+            <View
+              style={[
+                styles.pisteRemplie,
+                { width: `${Math.round(ratio * 100)}%` },
+              ]}
+            />
           </View>
         </View>
 
-        <View style={styles.carte}>
-          <View style={styles.codeLigne}>
-            <View>
-              <Text style={styles.libelle}>Code d'invitation</Text>
-              <Text style={styles.code}>{tontine.codeInvitation}</Text>
-            </View>
-            <Pressable onPress={copierCode} hitSlop={10}>
-              <MaterialIcons
-                name="content-copy"
-                size={24}
-                color={colors.purple}
-              />
-            </Pressable>
+        <View style={styles.carteCode}>
+          <View style={styles.codeGauche}>
+            <Text style={styles.libelle}>Code d’invitation</Text>
+            <Text style={styles.code}>{tontine.codeInvitation}</Text>
           </View>
-        </View>
-
-        <View style={[styles.carte, styles.carteCentree]}>
-          <Text style={styles.membresTitre}>
-            Membres ({tontine.membres.length})
-          </Text>
-        </View>
-
-        {tontine.membres.map((membre) => (
           <Pressable
-            key={membre.id}
-            onPress={() => basculerPaiement(membre)}
-            style={({ pressed }) => [styles.membre, pressed && { opacity: 0.85 }]}
+            onPress={copierCode}
+            hitSlop={10}
+            accessibilityLabel="Copier le code d'invitation"
+            style={({ pressed }) => [styles.copier, pressed && styles.presse]}
           >
-            <View style={styles.membreGauche}>
+            <MaterialIcons
+              name="content-copy"
+              size={18}
+              color={colors.purple}
+            />
+            <Text style={styles.copierTexte}>Copier</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.carteGestionnaire}>
+          <View style={styles.avatar}>
+            <MaterialIcons name="person" size={24} color={colors.onMint} />
+          </View>
+          <View style={styles.gestionnaireTexte}>
+            <Text style={styles.libelle}>Gestionnaire</Text>
+            <Text style={styles.gestionnaire}>{tontine.gestionnaire}</Text>
+          </View>
+          <View style={styles.membresBadge}>
+            <MaterialIcons name="group" size={14} color={colors.textMuted} />
+            <Text style={styles.membresBadgeTexte}>{total}</Text>
+          </View>
+        </View>
+
+        <View style={styles.sectionLigne}>
+          <Text style={styles.section}>Membres</Text>
+          <Text style={styles.sectionNote}>Appuyez pour changer le statut</Text>
+        </View>
+
+        {tontine.membres.length === 0 ? (
+          <View style={styles.videMembres}>
+            <Text style={styles.videMembresTexte}>
+              Aucun membre pour l’instant. Partagez le code d’invitation.
+            </Text>
+          </View>
+        ) : (
+          tontine.membres.map((membre) => (
+            <Pressable
+              key={membre.id}
+              onPress={() => basculerPaiement(membre)}
+              accessibilityRole="button"
+              accessibilityLabel={`${membre.nom}, ${
+                membre.aPaye ? 'a payé' : 'en retard'
+              }`}
+              style={({ pressed }) => [
+                styles.membre,
+                pressed && styles.presse,
+              ]}
+            >
               <View
                 style={[
-                  styles.statutIcone,
+                  styles.membreAvatar,
                   {
                     backgroundColor: membre.aPaye
-                      ? colors.green
-                      : colors.red,
+                      ? colors.greenSoft
+                      : colors.redSoft,
                   },
                 ]}
               >
-                <MaterialIcons
-                  name={membre.aPaye ? 'check' : 'close'}
-                  size={22}
-                  color={colors.white}
-                />
+                <Text
+                  style={[
+                    styles.membreInitiale,
+                    {
+                      color: membre.aPaye ? colors.green : colors.red,
+                    },
+                  ]}
+                >
+                  {membre.nom.charAt(0).toUpperCase()}
+                </Text>
               </View>
-              <Text style={styles.membreNom}>{membre.nom}</Text>
-            </View>
 
-            {membre.aPaye ? (
-              <View style={styles.badgePaye}>
-                <MaterialIcons name="check" size={16} color={colors.white} />
+              <View style={styles.membreTexte}>
+                <Text style={styles.membreNom}>{membre.nom}</Text>
+                <Text style={styles.membreSousTitre}>
+                  {membre.aPaye
+                    ? `${formatMontant(tontine.montant)} FCFA reçus`
+                    : 'Contribution en attente'}
+                </Text>
               </View>
-            ) : (
-              <View style={styles.badgeRetard}>
-                <Text style={styles.badgeRetardTexte}>En retard</Text>
-              </View>
-            )}
-          </Pressable>
-        ))}
+
+              {membre.aPaye ? (
+                <View style={styles.badgePaye}>
+                  <MaterialIcons
+                    name="check"
+                    size={14}
+                    color={colors.onAccent}
+                  />
+                  <Text style={styles.badgePayeTexte}>Payé</Text>
+                </View>
+              ) : (
+                <View style={styles.badgeRetard}>
+                  <Text style={styles.badgeRetardTexte}>En retard</Text>
+                </View>
+              )}
+            </Pressable>
+          ))
+        )}
       </ScrollView>
 
       <View style={styles.barre}>
-        <View>
+        <View style={styles.barreIcone}>
+          <MaterialIcons
+            name="event-available"
+            size={20}
+            color={colors.onAccent}
+          />
+        </View>
+        <View style={styles.barreTexte}>
           <Text style={styles.barreTitre}>Prochaine échéance</Text>
           <Text style={styles.barreDate}>
             le {formatDateCourte(tontine.dateDebut)}
           </Text>
         </View>
-        <MaterialIcons name="chevron-right" size={28} color={colors.white} />
+        <MaterialIcons
+          name="chevron-right"
+          size={24}
+          color={colors.onAccent}
+        />
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  ecran: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  flex: { flex: 1 },
-  contenu: {
-    paddingHorizontal: screenPadding,
-    paddingTop: 20,
-    paddingBottom: 20,
-  },
-  introuvable: {
-    flex: 1,
-    paddingHorizontal: screenPadding,
-    justifyContent: 'center',
-  },
-  introuvableTexte: {
-    fontSize: 18,
-    color: colors.greyText,
-    textAlign: 'center',
-  },
-  carte: {
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 16,
-  },
-  carteCentree: {
-    alignItems: 'center',
-  },
-  libelle: {
-    fontSize: 14,
-    color: colors.grey,
-  },
-  montant: {
-    marginTop: 6,
-    fontSize: 24,
-    fontWeight: '500',
-    color: colors.text,
-  },
-  gestionnaireLigne: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  gestionnaire: {
-    marginTop: 6,
-    fontSize: 22,
-    fontWeight: '500',
-    color: colors.text,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.mint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  codeLigne: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  code: {
-    marginTop: 6,
-    fontSize: 24,
-    fontWeight: 'bold',
-    letterSpacing: 6,
-    color: colors.green,
-  },
-  membresTitre: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: colors.text,
-  },
-  membre: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  membreGauche: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statutIcone: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  membreNom: {
-    marginLeft: 14,
-    fontSize: 18,
-    fontWeight: '500',
-    color: colors.text,
-  },
-  badgePaye: {
-    padding: 6,
-    borderRadius: 15,
-    backgroundColor: colors.green,
-  },
-  badgeRetard: {
-    backgroundColor: colors.redLight,
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  badgeRetardTexte: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.red,
-  },
-  barre: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.barGrey,
-    paddingHorizontal: screenPadding,
-    paddingVertical: 24,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  barreTitre: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: colors.white,
-  },
-  barreDate: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: colors.white,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ecran: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    flex: { flex: 1 },
+    contenu: {
+      paddingHorizontal: screenPadding,
+      paddingTop: 18,
+      paddingBottom: 20,
+    },
+    introuvable: {
+      flex: 1,
+      paddingHorizontal: screenPadding,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    introuvableTexte: {
+      marginTop: 12,
+      fontSize: 16,
+      color: c.textMuted,
+      textAlign: 'center',
+    },
+    etatLigne: {
+      alignSelf: 'flex-start',
+      marginTop: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 11,
+      paddingVertical: 5,
+      borderRadius: 20,
+    },
+    point: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+    },
+    etatTexte: {
+      fontSize: 11.5,
+      fontWeight: '700',
+    },
+    carteMontant: {
+      marginTop: 14,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      backgroundColor: c.card,
+      padding: 18,
+    },
+    libelle: {
+      fontSize: 11.5,
+      fontWeight: '600',
+      color: c.textFaint,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    montant: {
+      marginTop: 6,
+      fontSize: 30,
+      fontWeight: '800',
+      color: c.text,
+      letterSpacing: -0.8,
+    },
+    frequence: {
+      marginTop: 2,
+      fontSize: 13,
+      color: c.textMuted,
+    },
+    progressionLigne: {
+      marginTop: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    progressionTexte: {
+      fontSize: 12,
+      color: c.textMuted,
+    },
+    progressionMontant: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: c.green,
+    },
+    piste: {
+      marginTop: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: c.cardMuted,
+      overflow: 'hidden',
+    },
+    pisteRemplie: {
+      height: '100%',
+      borderRadius: 4,
+      backgroundColor: c.mint,
+    },
+    carteCode: {
+      marginTop: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      backgroundColor: c.card,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    codeGauche: {
+      flex: 1,
+    },
+    code: {
+      marginTop: 6,
+      fontSize: 22,
+      fontWeight: '800',
+      letterSpacing: 5,
+      color: c.green,
+    },
+    copier: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: c.purpleSoft,
+    },
+    copierTexte: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: c.purple,
+    },
+    presse: {
+      opacity: 0.78,
+    },
+    carteGestionnaire: {
+      marginTop: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      backgroundColor: c.card,
+      padding: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 16,
+      backgroundColor: c.mint,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    gestionnaireTexte: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    gestionnaire: {
+      marginTop: 3,
+      fontSize: 17,
+      fontWeight: '700',
+      color: c.text,
+    },
+    membresBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 20,
+      backgroundColor: c.cardMuted,
+    },
+    membresBadgeTexte: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: c.textMuted,
+    },
+    sectionLigne: {
+      marginTop: 24,
+      marginBottom: 10,
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+    },
+    section: {
+      fontSize: 17,
+      fontWeight: '800',
+      color: c.text,
+    },
+    sectionNote: {
+      fontSize: 11,
+      color: c.textFaint,
+    },
+    videMembres: {
+      padding: 18,
+      borderRadius: 16,
+      backgroundColor: c.cardMuted,
+    },
+    videMembresTexte: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: c.textMuted,
+      textAlign: 'center',
+    },
+    membre: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      backgroundColor: c.card,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginBottom: 10,
+    },
+    membreAvatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    membreInitiale: {
+      fontSize: 16,
+      fontWeight: '800',
+    },
+    membreTexte: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    membreNom: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: c.text,
+    },
+    membreSousTitre: {
+      marginTop: 2,
+      fontSize: 11.5,
+      color: c.textFaint,
+    },
+    badgePaye: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 20,
+      backgroundColor: c.greenSolid,
+    },
+    badgePayeTexte: {
+      fontSize: 11.5,
+      fontWeight: '700',
+      color: c.onAccent,
+    },
+    badgeRetard: {
+      backgroundColor: c.redSoft,
+      borderRadius: 20,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    badgeRetardTexte: {
+      fontSize: 11.5,
+      fontWeight: '700',
+      color: c.red,
+    },
+    barre: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.text,
+      paddingHorizontal: screenPadding,
+      paddingVertical: 16,
+      borderTopLeftRadius: 22,
+      borderTopRightRadius: 22,
+    },
+    barreIcone: {
+      width: 38,
+      height: 38,
+      borderRadius: 13,
+      backgroundColor: 'rgba(255,255,255,0.14)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    barreTexte: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    barreTitre: {
+      fontSize: 12,
+      color: 'rgba(255,255,255,0.65)',
+    },
+    barreDate: {
+      marginTop: 2,
+      fontSize: 17,
+      fontWeight: '700',
+      color: c.background,
+    },
+  });

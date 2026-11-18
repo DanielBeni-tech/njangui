@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# vérifications visuelles locales
+screenshot-*.png

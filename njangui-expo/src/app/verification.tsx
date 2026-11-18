@@ -3,7 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { colors } from '../theme';
+import { Palette } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 import { BackHeader } from '../ui/BackHeader';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { useToast } from '../ui/Toast';
@@ -28,6 +29,8 @@ const POINTS = [
 ];
 
 export default function VerificationScreen() {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber?: string }>();
   const numero = phoneNumber ?? '';
   const [chargement, setChargement] = useState(false);
@@ -54,10 +57,7 @@ export default function VerificationScreen() {
   return (
     <SafeAreaView style={styles.ecran} edges={['top', 'bottom']}>
       <View style={styles.contenu}>
-        <BackHeader
-          title="Vérification"
-          onPress={() => router.back()}
-        />
+        <BackHeader title="Vérification" onPress={() => router.back()} />
 
         <View style={styles.etapes}>
           <View style={styles.etapeActive} />
@@ -73,7 +73,7 @@ export default function VerificationScreen() {
 
         <View style={styles.carteNumero}>
           <View style={styles.avatar}>
-            <MaterialIcons name="smartphone" size={26} color={colors.purple} />
+            <MaterialIcons name="smartphone" size={24} color={colors.purple} />
           </View>
           <View style={styles.numeroBloc}>
             <Text style={styles.numeroLabel}>Numéro saisi</Text>
@@ -83,12 +83,9 @@ export default function VerificationScreen() {
             onPress={() => router.back()}
             hitSlop={10}
             accessibilityLabel="Modifier le numéro"
-            style={({ pressed }) => [
-              styles.modifier,
-              pressed && styles.presse,
-            ]}
+            style={({ pressed }) => [styles.modifier, pressed && styles.presse]}
           >
-            <MaterialIcons name="edit" size={16} color={colors.purple} />
+            <MaterialIcons name="edit" size={15} color={colors.purple} />
             <Text style={styles.modifierTexte}>Modifier</Text>
           </Pressable>
         </View>
@@ -128,142 +125,143 @@ export default function VerificationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  ecran: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  contenu: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 28,
-  },
-  etapes: {
-    marginTop: 28,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  etapeActive: {
-    width: 28,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.purple,
-  },
-  etapeInactive: {
-    width: 16,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-  },
-  etapeTexte: {
-    marginLeft: 6,
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.greyText,
-  },
-  titre: {
-    marginTop: 20,
-    fontSize: 27,
-    lineHeight: 34,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.4,
-  },
-  sousTitre: {
-    marginTop: 10,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-  },
-  carteNumero: {
-    marginTop: 26,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 18,
-    backgroundColor: colors.lightMint,
-    borderWidth: 1,
-    borderColor: 'rgba(46,158,110,0.18)',
-  },
-  avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 15,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  numeroBloc: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  numeroLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.greyText,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  numero: {
-    marginTop: 3,
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  modifier: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: colors.white,
-  },
-  presse: {
-    opacity: 0.65,
-  },
-  modifierTexte: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.purple,
-  },
-  liste: {
-    marginTop: 26,
-    gap: 18,
-  },
-  ligne: {
-    flexDirection: 'row',
-  },
-  ligneIcone: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    backgroundColor: colors.lightMint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ligneTexte: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  ligneTitre: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  ligneSousTitre: {
-    marginTop: 2,
-    fontSize: 12.5,
-    lineHeight: 18,
-    color: colors.greyText,
-  },
-  espace: { flex: 1, minHeight: 24 },
-  note: {
-    marginTop: 14,
-    fontSize: 11,
-    color: colors.greyText,
-    textAlign: 'center',
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ecran: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    contenu: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 16,
+      paddingBottom: 28,
+    },
+    etapes: {
+      marginTop: 26,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    etapeActive: {
+      width: 28,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.purple,
+    },
+    etapeInactive: {
+      width: 16,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.border,
+    },
+    etapeTexte: {
+      marginLeft: 6,
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.textFaint,
+    },
+    titre: {
+      marginTop: 20,
+      fontSize: 26,
+      lineHeight: 33,
+      fontWeight: '800',
+      color: c.text,
+      letterSpacing: -0.5,
+    },
+    sousTitre: {
+      marginTop: 10,
+      fontSize: 15,
+      lineHeight: 22,
+      color: c.textMuted,
+    },
+    carteNumero: {
+      marginTop: 24,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 14,
+      borderRadius: 18,
+      backgroundColor: c.mintSoft,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      backgroundColor: c.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    numeroBloc: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    numeroLabel: {
+      fontSize: 10.5,
+      fontWeight: '700',
+      color: c.textFaint,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    numero: {
+      marginTop: 3,
+      fontSize: 17,
+      fontWeight: '700',
+      color: c.text,
+    },
+    modifier: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      borderRadius: 20,
+      backgroundColor: c.card,
+    },
+    presse: {
+      opacity: 0.65,
+    },
+    modifierTexte: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.purple,
+    },
+    liste: {
+      marginTop: 26,
+      gap: 18,
+    },
+    ligne: {
+      flexDirection: 'row',
+    },
+    ligneIcone: {
+      width: 34,
+      height: 34,
+      borderRadius: 11,
+      backgroundColor: c.greenSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    ligneTexte: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    ligneTitre: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: c.text,
+    },
+    ligneSousTitre: {
+      marginTop: 2,
+      fontSize: 12.5,
+      lineHeight: 18,
+      color: c.textFaint,
+    },
+    espace: { flex: 1, minHeight: 24 },
+    note: {
+      marginTop: 14,
+      fontSize: 11,
+      color: c.textFaint,
+      textAlign: 'center',
+    },
+  });

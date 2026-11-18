@@ -9,7 +9,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, screenPadding } from '../theme';
+import { Palette, screenPadding } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 import { BackHeader } from '../ui/BackHeader';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { useToast } from '../ui/Toast';
@@ -17,21 +18,21 @@ import { useAppData } from '../store/AppData';
 import { Tontine } from '../types';
 import { formatMontant } from '../utils/format';
 
-function InfoRow({ label, valeur }: { label: string; valeur: string }) {
-  return (
-    <View style={styles.infoLigne}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValeur}>{valeur}</Text>
-    </View>
-  );
-}
-
 export default function RejoindreScreen() {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const { findTontineByCode, addMembre, notifyNouveauMembre } = useAppData();
   const toast = useToast();
 
   const [code, setCode] = useState('');
   const [trouvee, setTrouvee] = useState<Tontine | null>(null);
+
+  const InfoRow = ({ label, valeur }: { label: string; valeur: string }) => (
+    <View style={styles.infoLigne}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValeur}>{valeur}</Text>
+    </View>
+  );
 
   const rechercher = () => {
     if (!code.trim()) {
@@ -70,12 +71,12 @@ export default function RejoindreScreen() {
         />
 
         <View style={styles.iconeZone}>
-          <MaterialIcons name="group-add" size={80} color={colors.green} />
+          <MaterialIcons name="group-add" size={34} color={colors.green} />
         </View>
 
-        <Text style={styles.titre}>Entrez le code d'invitation</Text>
+        <Text style={styles.titre}>Entrez le code d’invitation</Text>
         <Text style={styles.sousTitre}>
-          Demandez le code au gestionnaire{'\n'}de la tontine
+          Demandez le code au gestionnaire de la tontine. Exemple : FAM001
         </Text>
 
         <TextInput
@@ -87,18 +88,31 @@ export default function RejoindreScreen() {
           placeholderTextColor={colors.borderStrong}
           style={styles.saisieCode}
           textAlign="center"
+          maxLength={10}
+          accessibilityLabel="Code d'invitation"
+          onSubmitEditing={rechercher}
         />
 
         <PrimaryButton
           label="Rechercher"
           onPress={rechercher}
           variant="purple"
+          leftIcon="search"
           style={styles.boutonRechercher}
         />
 
         {trouvee ? (
           <View style={styles.resultat}>
-            <Text style={styles.resultatTitre}>Tontine trouvée !</Text>
+            <View style={styles.resultatEntete}>
+              <View style={styles.resultatIcone}>
+                <MaterialIcons
+                  name="check"
+                  size={16}
+                  color={colors.onAccent}
+                />
+              </View>
+              <Text style={styles.resultatTitre}>Tontine trouvée</Text>
+            </View>
 
             <InfoRow label="Nom" valeur={trouvee.nom} />
             <InfoRow
@@ -125,78 +139,102 @@ export default function RejoindreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  ecran: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  contenu: {
-    paddingHorizontal: screenPadding,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  iconeZone: {
-    marginTop: 40,
-    alignItems: 'center',
-  },
-  titre: {
-    marginTop: 20,
-    fontSize: 18,
-    fontWeight: '500',
-    color: colors.text,
-    textAlign: 'center',
-  },
-  sousTitre: {
-    marginTop: 8,
-    fontSize: 14,
-    color: colors.grey,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  saisieCode: {
-    marginTop: 40,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    borderRadius: 12,
-    paddingVertical: 14,
-    fontSize: 24,
-    fontWeight: 'bold',
-    letterSpacing: 8,
-    color: colors.text,
-  },
-  boutonRechercher: {
-    marginTop: 16,
-  },
-  resultat: {
-    marginTop: 24,
-    borderWidth: 1,
-    borderColor: colors.green,
-    borderRadius: 12,
-    backgroundColor: colors.lightMint,
-    padding: 16,
-  },
-  resultatTitre: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.green,
-    marginBottom: 12,
-  },
-  infoLigne: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: colors.grey,
-  },
-  infoValeur: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text,
-  },
-  boutonRejoindre: {
-    marginTop: 8,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ecran: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    contenu: {
+      paddingHorizontal: screenPadding,
+      paddingTop: 18,
+      paddingBottom: 24,
+    },
+    iconeZone: {
+      marginTop: 34,
+      alignSelf: 'center',
+      width: 76,
+      height: 76,
+      borderRadius: 26,
+      backgroundColor: c.greenSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    titre: {
+      marginTop: 18,
+      fontSize: 21,
+      fontWeight: '800',
+      color: c.text,
+      textAlign: 'center',
+      letterSpacing: -0.3,
+    },
+    sousTitre: {
+      marginTop: 8,
+      fontSize: 13,
+      color: c.textMuted,
+      textAlign: 'center',
+      lineHeight: 19,
+    },
+    saisieCode: {
+      marginTop: 26,
+      borderWidth: 1.5,
+      borderColor: c.borderStrong,
+      borderRadius: 16,
+      paddingVertical: 15,
+      fontSize: 24,
+      fontWeight: '800',
+      letterSpacing: 7,
+      color: c.text,
+      backgroundColor: c.card,
+    },
+    boutonRechercher: {
+      marginTop: 16,
+    },
+    resultat: {
+      marginTop: 24,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      backgroundColor: c.backgroundAlt,
+      padding: 16,
+    },
+    resultatEntete: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 14,
+    },
+    resultatIcone: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: c.greenSolid,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    resultatTitre: {
+      fontSize: 13,
+      fontWeight: '800',
+      color: c.green,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    infoLigne: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 6,
+    },
+    infoLabel: {
+      fontSize: 13,
+      color: c.textMuted,
+    },
+    infoValeur: {
+      fontSize: 13.5,
+      fontWeight: '700',
+      color: c.text,
+    },
+    boutonRejoindre: {
+      marginTop: 14,
+    },
+  });

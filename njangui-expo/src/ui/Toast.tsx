@@ -7,20 +7,24 @@ import React, {
   useState,
 } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Palette } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 
 type ToastKind = 'default' | 'success' | 'error';
 type ShowToast = (message: string, kind?: ToastKind) => void;
 
 const ToastContext = createContext<ShowToast>(() => {});
 
-const FOND: Record<ToastKind, string> = {
-  default: colors.toast,
-  success: colors.green,
-  error: colors.redDark,
+const ICONES: Record<ToastKind, keyof typeof MaterialIcons.glyphMap> = {
+  default: 'info-outline',
+  success: 'check-circle-outline',
+  error: 'error-outline',
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const [toast, setToast] = useState<{ message: string; kind: ToastKind } | null>(
     null,
   );
@@ -57,6 +61,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const fond: Record<ToastKind, string> = {
+    default: colors.toast,
+    success: colors.greenSolid,
+    error: colors.redDark,
+  };
+
   return (
     <ToastContext.Provider value={show}>
       <View style={styles.root}>
@@ -64,11 +74,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toast ? (
           <Animated.View
             pointerEvents="none"
+            accessibilityLiveRegion="polite"
             style={[
               styles.toast,
-              { backgroundColor: FOND[toast.kind], opacity },
+              { backgroundColor: fond[toast.kind], opacity },
             ]}
           >
+            <MaterialIcons
+              name={ICONES[toast.kind]}
+              size={18}
+              color={colors.onAccent}
+            />
             <Text style={styles.text}>{toast.message}</Text>
           </Animated.View>
         ) : null}
@@ -81,21 +97,27 @@ export function useToast(): ShowToast {
   return useContext(ToastContext);
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  toast: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: 40,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    zIndex: 1000,
-    elevation: 6,
-  },
-  text: {
-    color: colors.white,
-    fontSize: 15,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    root: { flex: 1 },
+    toast: {
+      position: 'absolute',
+      left: 20,
+      right: 20,
+      bottom: 40,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      zIndex: 1000,
+      elevation: 6,
+    },
+    text: {
+      flex: 1,
+      color: c.onAccent,
+      fontSize: 14.5,
+      fontWeight: '500',
+    },
+  });

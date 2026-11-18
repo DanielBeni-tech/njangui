@@ -8,8 +8,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors, screenPadding } from '../theme';
+import { Palette, screenPadding } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 import { BackHeader } from '../ui/BackHeader';
 import { CheckboxRow } from '../ui/CheckboxRow';
 import { DatePickerModal } from '../ui/DatePickerModal';
@@ -21,22 +23,14 @@ import { formatDateLongue } from '../utils/format';
 
 type RadioRowProps = {
   label: string;
+  description: string;
   selected: boolean;
   onPress: () => void;
 };
 
-function RadioRow({ label, selected, onPress }: RadioRowProps) {
-  return (
-    <Pressable onPress={onPress} style={styles.radioLigne}>
-      <View style={[styles.radio, selected && styles.radioActif]}>
-        {selected ? <View style={styles.radioPoint} /> : null}
-      </View>
-      <Text style={styles.radioLabel}>{label}</Text>
-    </Pressable>
-  );
-}
-
 export default function CreationScreen() {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const { addTontine, notifyNouvelleTontine } = useAppData();
   const toast = useToast();
 
@@ -48,6 +42,32 @@ export default function CreationScreen() {
   const [prevuesObligatoires, setPrevuesObligatoires] = useState(true);
   const [membresVoientHistorique, setMembresVoientHistorique] =
     useState(true);
+
+  const RadioRow = ({
+    label,
+    description,
+    selected,
+    onPress,
+  }: RadioRowProps) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [
+        styles.radioLigne,
+        selected && styles.radioLigneActive,
+        pressed && styles.presse,
+      ]}
+    >
+      <View style={[styles.radio, selected && styles.radioActif]}>
+        {selected ? <View style={styles.radioPoint} /> : null}
+      </View>
+      <View style={styles.radioTexte}>
+        <Text style={styles.radioLabel}>{label}</Text>
+        <Text style={styles.radioDescription}>{description}</Text>
+      </View>
+    </Pressable>
+  );
 
   const creerTontine = () => {
     if (!nombreMembres.trim()) {
@@ -99,41 +119,82 @@ export default function CreationScreen() {
           onPress={() => router.back()}
         />
 
+        <Text style={styles.entete}>
+          Définissez les règles une fois : l’application les applique pour vous.
+        </Text>
+
         <Pressable
           onPress={() => setCalendrier(true)}
-          style={({ pressed }) => [styles.champCarte, pressed && { opacity: 0.85 }]}
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.champCarte,
+            pressed && styles.presse,
+          ]}
         >
-          <Text style={styles.libelle}>Date de début</Text>
+          <View style={styles.champEntete}>
+            <View style={styles.champIcone}>
+              <MaterialIcons
+                name="event"
+                size={16}
+                color={colors.purple}
+              />
+            </View>
+            <Text style={styles.libelle}>Date de début</Text>
+            <MaterialIcons
+              name="chevron-right"
+              size={20}
+              color={colors.textFaint}
+            />
+          </View>
           <Text style={styles.valeur}>{formatDateLongue(dateDebut)}</Text>
         </Pressable>
 
         <View style={styles.champCarte}>
-          <Text style={styles.libelle}>Ordre de réception</Text>
+          <View style={styles.champEntete}>
+            <View style={styles.champIcone}>
+              <MaterialIcons
+                name="shuffle"
+                size={16}
+                color={colors.purple}
+              />
+            </View>
+            <Text style={styles.libelle}>Ordre de réception</Text>
+          </View>
           <View style={styles.radios}>
             <RadioRow
               label="Tirage aléatoire"
+              description="Personne ne peut prévoir son tour"
               selected={ordre === 'aleatoire'}
               onPress={() => setOrdre('aleatoire')}
             />
             <RadioRow
               label="Ordre défini"
+              description="Le gestionnaire fixe l’ordre à l’avance"
               selected={ordre === 'defini'}
               onPress={() => setOrdre('defini')}
             />
           </View>
         </View>
 
-        <View style={styles.champNombre}>
+        <View style={styles.champCarte}>
+          <View style={styles.champEntete}>
+            <View style={styles.champIcone}>
+              <MaterialIcons name="group" size={16} color={colors.purple} />
+            </View>
+            <Text style={styles.libelle}>Nombre de membres</Text>
+          </View>
           <TextInput
             value={nombreMembres}
             onChangeText={setNombreMembres}
             keyboardType="number-pad"
-            placeholder="Nombre de membres"
-            placeholderTextColor={colors.grey}
+            placeholder="Ex. 8"
+            placeholderTextColor={colors.textFaint}
             style={styles.saisieNombre}
-            textAlign="center"
+            accessibilityLabel="Nombre de membres"
           />
         </View>
+
+        <Text style={styles.sousSection}>Options</Text>
 
         <CheckboxRow
           label="Tous les paiements sont enregistrés"
@@ -146,7 +207,7 @@ export default function CreationScreen() {
           onToggle={setPrevuesObligatoires}
         />
         <CheckboxRow
-          label="Les membres voient l'historique"
+          label="Les membres voient l’historique"
           value={membresVoientHistorique}
           onToggle={setMembresVoientHistorique}
         />
@@ -157,7 +218,7 @@ export default function CreationScreen() {
           label="Créer la tontine"
           onPress={creerTontine}
           variant="green"
-          height={60}
+          height={58}
           rightIcon="arrow-forward"
           labelStyle={styles.boutonLabel}
         />
@@ -178,82 +239,144 @@ export default function CreationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  ecran: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  flex: { flex: 1 },
-  contenu: {
-    paddingHorizontal: screenPadding,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  champCarte: {
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    borderRadius: 12,
-    padding: 16,
-  },
-  libelle: {
-    fontSize: 14,
-    color: colors.grey,
-  },
-  valeur: {
-    marginTop: 8,
-    fontSize: 24,
-    fontWeight: '500',
-    color: colors.text,
-  },
-  radios: {
-    marginTop: 8,
-  },
-  radioLigne: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: colors.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  radioActif: {
-    borderColor: colors.green,
-  },
-  radioPoint: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.green,
-  },
-  radioLabel: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  champNombre: {
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    borderRadius: 12,
-  },
-  saisieNombre: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    fontSize: 20,
-    color: colors.text,
-  },
-  pied: {
-    padding: 20,
-  },
-  boutonLabel: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ecran: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    flex: { flex: 1 },
+    contenu: {
+      paddingHorizontal: screenPadding,
+      paddingTop: 18,
+      paddingBottom: 24,
+    },
+    entete: {
+      marginTop: 14,
+      fontSize: 13,
+      lineHeight: 19,
+      color: c.textMuted,
+    },
+    champCarte: {
+      marginTop: 14,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      backgroundColor: c.card,
+      padding: 16,
+    },
+    champEntete: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    champIcone: {
+      width: 26,
+      height: 26,
+      borderRadius: 9,
+      backgroundColor: c.purpleSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    libelle: {
+      flex: 1,
+      fontSize: 12,
+      fontWeight: '700',
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+    },
+    valeur: {
+      marginTop: 12,
+      fontSize: 22,
+      fontWeight: '800',
+      color: c.text,
+      letterSpacing: -0.4,
+    },
+    radios: {
+      marginTop: 12,
+      gap: 8,
+    },
+    radioLigne: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      backgroundColor: c.background,
+    },
+    radioLigneActive: {
+      borderColor: c.green,
+      backgroundColor: c.greenSoft,
+    },
+    presse: {
+      opacity: 0.85,
+    },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: c.borderStrong,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 10,
+    },
+    radioActif: {
+      borderColor: c.green,
+    },
+    radioPoint: {
+      width: 9,
+      height: 9,
+      borderRadius: 5,
+      backgroundColor: c.green,
+    },
+    radioTexte: {
+      flex: 1,
+    },
+    radioLabel: {
+      fontSize: 14.5,
+      fontWeight: '600',
+      color: c.text,
+    },
+    radioDescription: {
+      marginTop: 2,
+      fontSize: 11.5,
+      color: c.textFaint,
+    },
+    saisieNombre: {
+      marginTop: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      fontSize: 18,
+      fontWeight: '600',
+      color: c.text,
+      backgroundColor: c.background,
+    },
+    sousSection: {
+      marginTop: 22,
+      marginBottom: 10,
+      fontSize: 12,
+      fontWeight: '700',
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    pied: {
+      paddingHorizontal: screenPadding,
+      paddingTop: 12,
+      paddingBottom: 20,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+      backgroundColor: c.background,
+    },
+    boutonLabel: {
+      fontSize: 17,
+      fontWeight: '700',
+    },
+  });

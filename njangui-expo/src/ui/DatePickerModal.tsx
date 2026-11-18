@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { Palette } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 import { MOIS } from '../utils/format';
 
 type Props = {
@@ -35,6 +36,8 @@ export function DatePickerModal({
   onCancel,
   onConfirm,
 }: Props) {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const [curseur, setCurseur] = useState(() => debutDuMois(value));
   const [selection, setSelection] = useState(value);
 
@@ -79,6 +82,7 @@ export function DatePickerModal({
           <View style={styles.moisLigne}>
             <Pressable
               hitSlop={12}
+              accessibilityLabel="Mois précédent"
               onPress={() => setCurseur(new Date(annee, moisIndex - 1, 1))}
             >
               <MaterialIcons
@@ -92,6 +96,7 @@ export function DatePickerModal({
             </Text>
             <Pressable
               hitSlop={12}
+              accessibilityLabel="Mois suivant"
               onPress={() => setCurseur(new Date(annee, moisIndex + 1, 1))}
             >
               <MaterialIcons
@@ -158,96 +163,99 @@ export function DatePickerModal({
   );
 }
 
-const styles = StyleSheet.create({
-  fond: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  carte: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: 20,
-  },
-  titre: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  moisLigne: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  moisTexte: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  grille: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  case: {
-    width: `${100 / 7}%`,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 3,
-  },
-  jourSemaine: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.greyText,
-    paddingVertical: 6,
-  },
-  jour: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  jourActif: {
-    backgroundColor: colors.purple,
-  },
-  jourTexte: {
-    fontSize: 15,
-    color: colors.text,
-  },
-  jourTexteActif: {
-    color: colors.white,
-    fontWeight: 'bold',
-  },
-  jourTexteInactif: {
-    color: colors.borderStrong,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginTop: 16,
-  },
-  annuler: {
-    fontSize: 15,
-    color: colors.greyText,
-    marginRight: 24,
-  },
-  valider: {
-    backgroundColor: colors.purple,
-    borderRadius: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-  },
-  validerTexte: {
-    color: colors.white,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    fond: {
+      flex: 1,
+      backgroundColor: c.scrim,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    carte: {
+      width: '100%',
+      maxWidth: 360,
+      backgroundColor: c.card,
+      borderRadius: 22,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    titre: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: c.text,
+      textAlign: 'center',
+      marginBottom: 14,
+    },
+    moisLigne: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+    },
+    moisTexte: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: c.text,
+    },
+    grille: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    case: {
+      width: `${100 / 7}%`,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 3,
+    },
+    jourSemaine: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.textFaint,
+      paddingVertical: 6,
+    },
+    jour: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    jourActif: {
+      backgroundColor: c.purpleSolid,
+    },
+    jourTexte: {
+      fontSize: 15,
+      color: c.text,
+    },
+    jourTexteActif: {
+      color: c.onAccent,
+      fontWeight: '700',
+    },
+    jourTexteInactif: {
+      color: c.borderStrong,
+    },
+    actions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      marginTop: 18,
+    },
+    annuler: {
+      fontSize: 15,
+      color: c.textMuted,
+      marginRight: 24,
+    },
+    valider: {
+      backgroundColor: c.purpleSolid,
+      borderRadius: 20,
+      paddingHorizontal: 24,
+      paddingVertical: 10,
+    },
+    validerTexte: {
+      color: c.onAccent,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+  });

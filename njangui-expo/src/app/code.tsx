@@ -11,7 +11,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { colors } from '../theme';
+import { Palette } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 import { BackHeader } from '../ui/BackHeader';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { useToast } from '../ui/Toast';
@@ -24,6 +25,8 @@ import { useAuth } from '../store/Auth';
 const DUREE_RENVOI = 30;
 
 export default function CodeScreen() {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const params = useLocalSearchParams<{
     phoneNumber?: string;
     verificationId?: string;
@@ -174,7 +177,7 @@ export default function CodeScreen() {
         <View style={styles.iconeBoite}>
           <MaterialIcons
             name="mark-email-read"
-            size={30}
+            size={28}
             color={colors.purple}
           />
         </View>
@@ -216,12 +219,8 @@ export default function CodeScreen() {
         </View>
 
         {erreur ? (
-          <View style={styles.ligneErreur}>
-            <MaterialIcons
-              name="error-outline"
-              size={14}
-              color={colors.redDark}
-            />
+          <View style={styles.ligneInfo}>
+            <MaterialIcons name="error-outline" size={14} color={colors.red} />
             <Text style={styles.erreur}>{erreur}</Text>
           </View>
         ) : (
@@ -229,7 +228,7 @@ export default function CodeScreen() {
             <MaterialIcons
               name="schedule"
               size={14}
-              color={colors.greyText}
+              color={colors.textFaint}
             />
             <Text style={styles.info}>
               Le code expire dans 5 minutes. Vérifiez aussi vos SMS indésirables.
@@ -239,11 +238,7 @@ export default function CodeScreen() {
 
         {devCode ? (
           <View style={styles.demo}>
-            <MaterialIcons
-              name="science"
-              size={16}
-              color={colors.teal}
-            />
+            <MaterialIcons name="science" size={16} color={colors.teal} />
             <Text style={styles.demoTexte}>
               Mode démo — votre code :{' '}
               <Text style={styles.demoCode}>{devCode}</Text>
@@ -286,155 +281,149 @@ export default function CodeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  ecran: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  contenu: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 28,
-  },
-  etapes: {
-    marginTop: 28,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  etapeActive: {
-    width: 22,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.purple,
-  },
-  etapeTexte: {
-    marginLeft: 6,
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.greyText,
-  },
-  iconeBoite: {
-    marginTop: 26,
-    width: 58,
-    height: 58,
-    borderRadius: 18,
-    backgroundColor: colors.lightMint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  titre: {
-    marginTop: 18,
-    fontSize: 27,
-    lineHeight: 34,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.4,
-  },
-  sousTitre: {
-    marginTop: 8,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-  },
-  numero: {
-    fontWeight: '700',
-    color: colors.text,
-  },
-  cases: {
-    marginTop: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  case: {
-    flex: 1,
-    minWidth: 0,
-    maxWidth: 52,
-    height: 58,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 14,
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.text,
-    paddingVertical: 0,
-    backgroundColor: colors.surfaceMuted,
-  },
-  caseActive: {
-    borderColor: colors.purple,
-    backgroundColor: colors.white,
-  },
-  caseRemplie: {
-    borderColor: colors.purple,
-    backgroundColor: colors.white,
-    color: colors.purple,
-  },
-  caseErreur: {
-    borderColor: colors.redDark,
-  },
-  ligneInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 12,
-    paddingHorizontal: 2,
-  },
-  info: {
-    flex: 1,
-    fontSize: 12,
-    color: colors.greyText,
-  },
-  ligneErreur: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 12,
-    paddingHorizontal: 2,
-  },
-  erreur: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.redDark,
-  },
-  demo: {
-    marginTop: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: 'rgba(46,139,154,0.08)',
-  },
-  demoTexte: {
-    flex: 1,
-    fontSize: 12.5,
-    color: colors.textMuted,
-  },
-  demoCode: {
-    fontWeight: '800',
-    color: colors.teal,
-    letterSpacing: 1,
-  },
-  renvoyer: {
-    marginTop: 18,
-    alignSelf: 'center',
-    paddingVertical: 4,
-  },
-  presse: {
-    opacity: 0.6,
-  },
-  renvoyerTexte: {
-    fontSize: 13.5,
-    fontWeight: '600',
-    color: colors.purple,
-  },
-  renvoyerInactif: {
-    color: colors.greyText,
-    fontWeight: '500',
-  },
-  espace: { flex: 1, minHeight: 20 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ecran: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    contenu: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 16,
+      paddingBottom: 28,
+    },
+    etapes: {
+      marginTop: 26,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    etapeActive: {
+      width: 22,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.purple,
+    },
+    etapeTexte: {
+      marginLeft: 6,
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.textFaint,
+    },
+    iconeBoite: {
+      marginTop: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 18,
+      backgroundColor: c.mintSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    titre: {
+      marginTop: 18,
+      fontSize: 26,
+      lineHeight: 33,
+      fontWeight: '800',
+      color: c.text,
+      letterSpacing: -0.5,
+    },
+    sousTitre: {
+      marginTop: 8,
+      fontSize: 15,
+      lineHeight: 22,
+      color: c.textMuted,
+    },
+    numero: {
+      fontWeight: '700',
+      color: c.text,
+    },
+    cases: {
+      marginTop: 28,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 8,
+    },
+    case: {
+      flex: 1,
+      minWidth: 0,
+      maxWidth: 52,
+      height: 58,
+      borderWidth: 1.5,
+      borderColor: c.border,
+      borderRadius: 14,
+      fontSize: 22,
+      fontWeight: '700',
+      color: c.text,
+      paddingVertical: 0,
+      backgroundColor: c.cardMuted,
+    },
+    caseActive: {
+      borderColor: c.purple,
+      backgroundColor: c.card,
+    },
+    caseRemplie: {
+      borderColor: c.purple,
+      backgroundColor: c.card,
+      color: c.purple,
+    },
+    caseErreur: {
+      borderColor: c.red,
+    },
+    ligneInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 12,
+      paddingHorizontal: 2,
+    },
+    info: {
+      flex: 1,
+      fontSize: 12,
+      color: c.textFaint,
+    },
+    erreur: {
+      flex: 1,
+      fontSize: 12,
+      fontWeight: '500',
+      color: c.red,
+    },
+    demo: {
+      marginTop: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: 12,
+      backgroundColor: c.tealSoft,
+    },
+    demoTexte: {
+      flex: 1,
+      fontSize: 12.5,
+      color: c.textMuted,
+    },
+    demoCode: {
+      fontWeight: '800',
+      color: c.teal,
+      letterSpacing: 1,
+    },
+    renvoyer: {
+      marginTop: 18,
+      alignSelf: 'center',
+      paddingVertical: 4,
+    },
+    presse: {
+      opacity: 0.6,
+    },
+    renvoyerTexte: {
+      fontSize: 13.5,
+      fontWeight: '600',
+      color: c.purple,
+    },
+    renvoyerInactif: {
+      color: c.textFaint,
+      fontWeight: '500',
+    },
+    espace: { flex: 1, minHeight: 20 },
+  });

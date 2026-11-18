@@ -12,11 +12,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { colors } from '../theme';
+import { Palette } from '../theme';
+import { useStyles, useTheme } from '../store/Theme';
 import { PrimaryButton } from '../ui/PrimaryButton';
+import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { formatPhoneNumber } from '../services/auth';
 
 export default function LoginScreen() {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   const [telephone, setTelephone] = useState('');
   const [focus, setFocus] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -73,9 +77,25 @@ export default function LoginScreen() {
             </View>
           </View>
 
+          <View style={styles.apparence}>
+            <View style={styles.apparenceTexte}>
+              <MaterialIcons
+                name="palette"
+                size={15}
+                color={colors.textFaint}
+              />
+              <Text style={styles.apparenceLabel}>Apparence</Text>
+            </View>
+            <ThemeSwitch compact />
+          </View>
+
           <View style={styles.entete}>
             <View style={styles.pastille}>
-              <MaterialIcons name="verified-user" size={14} color={colors.purple} />
+              <MaterialIcons
+                name="verified-user"
+                size={14}
+                color={colors.purple}
+              />
               <Text style={styles.pastilleTexte}>Connexion sécurisée</Text>
             </View>
             <Text style={styles.titre}>Bienvenue sur Njangi</Text>
@@ -107,7 +127,7 @@ export default function LoginScreen() {
               onBlur={() => setFocus(false)}
               keyboardType="phone-pad"
               placeholder="6 90 12 34 56"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={colors.textFaint}
               style={styles.saisie}
               returnKeyType="done"
               onSubmitEditing={recevoirCode}
@@ -119,8 +139,8 @@ export default function LoginScreen() {
           </View>
 
           {erreur ? (
-            <View style={styles.ligneErreur}>
-              <MaterialIcons name="error-outline" size={14} color={colors.redDark} />
+            <View style={styles.ligneInfo}>
+              <MaterialIcons name="error-outline" size={14} color={colors.red} />
               <Text style={styles.erreur}>{erreur}</Text>
             </View>
           ) : (
@@ -128,7 +148,7 @@ export default function LoginScreen() {
               <MaterialIcons
                 name="lock-outline"
                 size={14}
-                color={colors.greyText}
+                color={colors.textFaint}
               />
               <Text style={styles.info}>
                 Nous vous enverrons un code de vérification par SMS.
@@ -157,200 +177,211 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  ecran: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  flex: { flex: 1 },
-  decor: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    overflow: 'hidden',
-  },
-  blobHaut: {
-    position: 'absolute',
-    top: -140,
-    right: -110,
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: 'rgba(123,45,139,0.07)',
-  },
-  blobBas: {
-    position: 'absolute',
-    bottom: -120,
-    left: -100,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(144,238,212,0.22)',
-  },
-  contenu: {
-    flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 28,
-  },
-  marque: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoBoite: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(123,45,139,0.12)',
-    shadowColor: colors.purple,
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  logo: {
-    height: 42,
-    width: 42,
-  },
-  marqueTexte: {
-    marginLeft: 12,
-  },
-  nom: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: colors.purple,
-    letterSpacing: -0.3,
-  },
-  slogan: {
-    fontSize: 12,
-    color: colors.greyText,
-  },
-  entete: {
-    marginTop: 44,
-  },
-  pastille: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 30,
-    backgroundColor: colors.lightMint,
-  },
-  pastilleTexte: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.purple,
-  },
-  titre: {
-    marginTop: 16,
-    fontSize: 30,
-    lineHeight: 36,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  description: {
-    marginTop: 10,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-  },
-  label: {
-    marginTop: 36,
-    marginBottom: 8,
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  champ: {
-    height: 58,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    backgroundColor: colors.white,
-  },
-  champActif: {
-    borderColor: colors.purple,
-    backgroundColor: 'rgba(123,45,139,0.02)',
-  },
-  champErreur: {
-    borderColor: colors.redDark,
-  },
-  indicatif: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 12,
-    marginRight: 12,
-    borderRightWidth: 1,
-    borderRightColor: colors.border,
-  },
-  drapeau: {
-    fontSize: 17,
-    marginRight: 6,
-  },
-  indicatifTexte: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  saisie: {
-    flex: 1,
-    fontSize: 17,
-    color: colors.text,
-    paddingVertical: 0,
-    letterSpacing: 0.5,
-  },
-  ligneInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 10,
-    paddingHorizontal: 2,
-  },
-  info: {
-    flex: 1,
-    fontSize: 12,
-    color: colors.greyText,
-  },
-  ligneErreur: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 10,
-    paddingHorizontal: 2,
-  },
-  erreur: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.redDark,
-  },
-  bouton: {
-    marginTop: 28,
-  },
-  conditions: {
-    marginTop: 'auto',
-    paddingTop: 28,
-  },
-  conditionsTexte: {
-    fontSize: 11,
-    lineHeight: 17,
-    color: colors.greyText,
-    textAlign: 'center',
-  },
-  lien: {
-    color: colors.purple,
-    fontWeight: '600',
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ecran: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    flex: { flex: 1 },
+    decor: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      overflow: 'hidden',
+    },
+    blobHaut: {
+      position: 'absolute',
+      top: -140,
+      right: -110,
+      width: 320,
+      height: 320,
+      borderRadius: 160,
+      backgroundColor: c.decorA,
+    },
+    blobBas: {
+      position: 'absolute',
+      bottom: -120,
+      left: -100,
+      width: 260,
+      height: 260,
+      borderRadius: 130,
+      backgroundColor: c.decorB,
+    },
+    contenu: {
+      flexGrow: 1,
+      paddingHorizontal: 28,
+      paddingTop: 24,
+      paddingBottom: 28,
+    },
+    marque: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    logoBoite: {
+      width: 52,
+      height: 52,
+      borderRadius: 17,
+      backgroundColor: c.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: c.border,
+      shadowColor: c.shadow,
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
+    },
+    logo: {
+      height: 38,
+      width: 38,
+    },
+    marqueTexte: {
+      marginLeft: 12,
+    },
+    nom: {
+      fontSize: 23,
+      fontWeight: '800',
+      color: c.purple,
+      letterSpacing: -0.3,
+    },
+    slogan: {
+      fontSize: 12,
+      color: c.textMuted,
+    },
+    apparence: {
+      marginTop: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    apparenceTexte: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    apparenceLabel: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.textFaint,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    entete: {
+      marginTop: 30,
+    },
+    pastille: {
+      alignSelf: 'flex-start',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 30,
+      backgroundColor: c.mintSoft,
+    },
+    pastilleTexte: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.purple,
+    },
+    titre: {
+      marginTop: 16,
+      fontSize: 29,
+      lineHeight: 35,
+      fontWeight: '800',
+      color: c.text,
+      letterSpacing: -0.6,
+    },
+    description: {
+      marginTop: 10,
+      fontSize: 15,
+      lineHeight: 22,
+      color: c.textMuted,
+    },
+    label: {
+      marginTop: 28,
+      marginBottom: 8,
+      fontSize: 13,
+      fontWeight: '600',
+      color: c.text,
+    },
+    champ: {
+      height: 58,
+      borderWidth: 1.5,
+      borderColor: c.border,
+      borderRadius: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 14,
+      backgroundColor: c.card,
+    },
+    champActif: {
+      borderColor: c.purple,
+    },
+    champErreur: {
+      borderColor: c.red,
+    },
+    indicatif: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingRight: 12,
+      marginRight: 12,
+      borderRightWidth: 1,
+      borderRightColor: c.border,
+    },
+    drapeau: {
+      fontSize: 17,
+      marginRight: 6,
+    },
+    indicatifTexte: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: c.text,
+    },
+    saisie: {
+      flex: 1,
+      fontSize: 17,
+      color: c.text,
+      paddingVertical: 0,
+      letterSpacing: 0.5,
+    },
+    ligneInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 10,
+      paddingHorizontal: 2,
+    },
+    info: {
+      flex: 1,
+      fontSize: 12,
+      color: c.textFaint,
+    },
+    erreur: {
+      flex: 1,
+      fontSize: 12,
+      fontWeight: '500',
+      color: c.red,
+    },
+    bouton: {
+      marginTop: 26,
+    },
+    conditions: {
+      marginTop: 'auto',
+      paddingTop: 24,
+    },
+    conditionsTexte: {
+      fontSize: 11,
+      lineHeight: 17,
+      color: c.textFaint,
+      textAlign: 'center',
+    },
+    lien: {
+      color: c.purple,
+      fontWeight: '600',
+    },
+  });

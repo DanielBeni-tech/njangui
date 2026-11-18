@@ -11,6 +11,7 @@ import {
   Tontine,
   TypeNotification,
 } from '../types';
+import { useNotifications } from './Notifications';
 
 const tontinesInitiales: Tontine[] = [
   {
@@ -88,6 +89,7 @@ const AppDataContext = createContext<AppDataValue | null>(null);
 let sequence = 0;
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
+  const { notify } = useNotifications();
   const [tontines, setTontines] = useState<Tontine[]>(tontinesInitiales);
   const [notifications, setNotifications] = useState<NotificationModel[]>([]);
 
@@ -159,8 +161,9 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         lu: false,
       };
       setNotifications((prev) => [notification, ...prev]);
+      notify(titre, message);
     },
-    [],
+    [notify],
   );
 
   const marquerCommeLue = useCallback((id: string) => {

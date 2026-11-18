@@ -1,29 +1,44 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '../../theme';
+import { useTheme } from '../../store/Theme';
 import { useAppData } from '../../store/AppData';
+
+export const unstable_settings = {
+  initialRouteName: 'accueil',
+};
 
 export default function TabsLayout() {
   const { nonLues } = useAppData();
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.purple,
-        tabBarInactiveTintColor: colors.grey,
-        tabBarLabelStyle: { fontSize: 11 },
-        tabBarStyle: { backgroundColor: colors.white },
-        sceneStyle: { backgroundColor: colors.white },
+        tabBarInactiveTintColor: colors.textFaint,
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
+          height: 62,
+          paddingTop: 6,
+          paddingBottom: 8,
+        },
+        sceneStyle: { backgroundColor: colors.background },
       }}
     >
       <Tabs.Screen
         name="accueil"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color as string} />
+          title: 'Accueil',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialIcons
+              name={focused ? 'home' : 'home'}
+              size={size}
+              color={color as string}
+            />
           ),
         }}
       />
@@ -32,7 +47,7 @@ export default function TabsLayout() {
         options={{
           title: 'Tontines',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="description" size={size} color={color as string} />
+            <MaterialIcons name="groups" size={size} color={color as string} />
           ),
         }}
       />
@@ -42,8 +57,8 @@ export default function TabsLayout() {
           title: 'Alertes',
           tabBarBadge: nonLues > 0 ? nonLues : undefined,
           tabBarBadgeStyle: {
-            backgroundColor: colors.redDark,
-            color: colors.white,
+            backgroundColor: colors.red,
+            color: colors.onAccent,
             fontSize: 10,
           },
           tabBarIcon: ({ color, size, focused }) => (
