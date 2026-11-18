@@ -42,3 +42,6 @@ yarn-error.*
 
 # vérifications visuelles locales
 screenshot-*.png
+
+dist/
+public-web/
