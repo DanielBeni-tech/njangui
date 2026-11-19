@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,22 +10,23 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Palette, radius } from '../theme';
+import { Palette, screenPadding } from '../theme';
 import { useStyles, useTheme } from '../store/Theme';
 import { BackHeader } from '../ui/BackHeader';
+import { CheckboxRow } from '../ui/CheckboxRow';
 import { DatePickerModal } from '../ui/DatePickerModal';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { useToast } from '../ui/Toast';
 import { useAppData } from '../store/AppData';
-import { Tontine } from '../types';
+import { OrdreReception, Tontine } from '../types';
 import { formatDateLongue } from '../utils/format';
 
-type Frequence = 'semaine' | 'mois';
-
-const FREQUENCES: Array<{ id: Frequence; label: string; aide: string }> = [
-  { id: 'mois', label: 'Mensuelle', aide: 'chaque mois' },
-  { id: 'semaine', label: 'Hebdomadaire', aide: 'chaque semaine' },
-];
+type RadioRowProps = {
+  label: string;
+  description: string;
+  selected: boolean;
+  onPress: () => void;
+};
 
 export default function CreationScreen() {
   const styles = useStyles(makeStyles);
@@ -35,42 +34,67 @@ export default function CreationScreen() {
   const { addTontine, notifyNouvelleTontine } = useAppData();
   const toast = useToast();
 
-  const [nom, setNom] = useState('');
-  const [frequence, setFrequence] = useState<Frequence>('mois');
-  const [montant, setMontant] = useState('');
-  const [membres, setMembres] = useState(3);
   const [dateDebut, setDateDebut] = useState(new Date());
   const [calendrier, setCalendrier] = useState(false);
+  const [ordre, setOrdre] = useState<OrdreReception>('aleatoire');
+  const [nombreMembres, setNombreMembres] = useState('');
+  const [paiementsEnregistres, setPaiementsEnregistres] = useState(true);
+  const [prevuesObligatoires, setPrevuesObligatoires] = useState(true);
+  const [membresVoientHistorique, setMembresVoientHistorique] =
+    useState(true);
 
-  const montantNombre = Number.parseInt(montant.replace(/[^0-9]/g, ''), 10);
-  const valide = nom.trim().length > 1 && !Number.isNaN(montantNombre) && montantNombre > 0;
+  const RadioRow = ({
+    label,
+    description,
+    selected,
+    onPress,
+  }: RadioRowProps) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [
+        styles.radioLigne,
+        selected && styles.radioLigneActive,
+        pressed && styles.presse,
+      ]}
+    >
+      <View style={[styles.radio, selected && styles.radioActif]}>
+        {selected ? <View style={styles.radioPoint} /> : null}
+      </View>
+      <View style={styles.radioTexte}>
+        <Text style={styles.radioLabel}>{label}</Text>
+        <Text style={styles.radioDescription}>{description}</Text>
+      </View>
+    </Pressable>
+  );
 
   const creerTontine = () => {
-    if (!nom.trim()) {
-      toast('Donnez un nom à votre tontine', 'error');
+    if (!nombreMembres.trim()) {
+      toast('Veuillez entrer le nombre de membres');
       return;
     }
-    if (Number.isNaN(montantNombre) || montantNombre <= 0) {
-      toast('Indiquez un montant par membre', 'error');
+    const nombre = Number.parseInt(nombreMembres, 10);
+    if (Number.isNaN(nombre) || nombre <= 0) {
+      toast('Veuillez entrer un nombre valide', 'error');
       return;
     }
 
-    const code = `NJ${String(Date.now()).slice(-5)}`;
-    const libelle = FREQUENCES.find((f) => f.id === frequence)?.aide ?? 'chaque mois';
+    const code = `TN${String(Date.now()).slice(-6)}`;
 
     const tontine: Tontine = {
       id: String(Date.now()),
-      nom: nom.trim(),
-      montant: montantNombre,
-      frequence,
+      nom: 'Nouvelle tontine',
+      montant: 0,
+      frequence: 'mois',
       prochaineEcheance: formatDateLongue(dateDebut),
       enCours: false,
       dateDebut,
-      ordreReception: 'aleatoire',
-      nombreMembres: membres,
-      paiementsEnregistres: true,
-      prevuesObligatoires: true,
-      membresVoientHistorique: true,
+      ordreReception: ordre,
+      nombreMembres: nombre,
+      paiementsEnregistres,
+      prevuesObligatoires,
+      membresVoientHistorique,
       gestionnaire: 'Moi',
       membres: [],
       codeInvitation: code,
@@ -78,148 +102,133 @@ export default function CreationScreen() {
 
     addTontine(tontine);
     notifyNouvelleTontine(tontine.nom);
-    toast(`« ${tontine.nom} » créée — ${libelle}, ${code}`, 'success');
+    toast(`Tontine créée ! Code : ${code}`, 'success');
     router.back();
   };
 
   return (
     <SafeAreaView style={styles.ecran} edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
+      <ScrollView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        contentContainerStyle={styles.contenu}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          style={styles.flex}
-          contentContainerStyle={styles.contenu}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <BackHeader
+          title="Règles de la tontine"
+          onPress={() => router.back()}
+        />
+
+        <Text style={styles.entete}>
+          Définissez les règles : elles s’appliquent automatiquement.
+        </Text>
+
+        <Pressable
+          onPress={() => setCalendrier(true)}
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.champCarte,
+            pressed && styles.presse,
+          ]}
         >
-          <BackHeader title="Créer une tontine" onPress={() => router.back()} />
-
-          <View style={styles.pastille}>
-            <MaterialIcons name="group-add" size={26} color={colors.purple} />
-          </View>
-
-          <Text style={styles.titre}>Donnez un nom à votre tontine</Text>
-
-          <TextInput
-            value={nom}
-            onChangeText={setNom}
-            placeholder="Ex. Famille, Amis, Collègues…"
-            placeholderTextColor={colors.textFaint}
-            style={styles.saisieNom}
-            accessibilityLabel="Nom de la tontine"
-            maxLength={40}
-          />
-
-          <Text style={styles.label}>Choisissez la fréquence</Text>
-          <View style={styles.frequences}>
-            {FREQUENCES.map((option) => {
-              const actif = frequence === option.id;
-              return (
-                <Pressable
-                  key={option.id}
-                  onPress={() => setFrequence(option.id)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: actif }}
-                  style={({ pressed }) => [
-                    styles.frequence,
-                    actif && styles.frequenceActive,
-                    pressed && !actif && styles.presse,
-                  ]}
-                >
-                  <MaterialIcons
-                    name={option.id === 'mois' ? 'calendar-month' : 'calendar-view-week'}
-                    size={17}
-                    color={actif ? colors.onAccent : colors.textMuted}
-                  />
-                  <Text
-                    style={[
-                      styles.frequenceTexte,
-                      actif && styles.frequenceTexteActif,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <Text style={styles.label}>Montant par membre</Text>
-          <View style={styles.montantChamp}>
-            <TextInput
-              value={montant}
-              onChangeText={(valeur) => setMontant(valeur.replace(/[^0-9]/g, ''))}
-              placeholder="Ex. 10 000"
-              placeholderTextColor={colors.textFaint}
-              keyboardType="number-pad"
-              style={styles.montantSaisie}
-              accessibilityLabel="Montant par membre"
-              maxLength={9}
+          <View style={styles.champEntete}>
+            <View style={styles.champIcone}>
+              <MaterialIcons
+                name="event"
+                size={16}
+                color={colors.purple}
+              />
+            </View>
+            <Text style={styles.libelle}>Date de début</Text>
+            <MaterialIcons
+              name="chevron-right"
+              size={20}
+              color={colors.textFaint}
             />
-            <Text style={styles.devise}>FCFA</Text>
           </View>
+          <Text style={styles.valeur}>{formatDateLongue(dateDebut)}</Text>
+        </Pressable>
 
-          <Text style={styles.label}>Nombre de membres</Text>
-          <View style={styles.compteur}>
-            <Pressable
-              onPress={() => setMembres((valeur) => Math.max(2, valeur - 1))}
-              disabled={membres <= 2}
-              accessibilityLabel="Retirer un membre"
-              style={({ pressed }) => [
-                styles.compteurBouton,
-                membres <= 2 && styles.compteurInactif,
-                pressed && styles.presse,
-              ]}
-            >
-              <MaterialIcons name="remove" size={20} color={colors.text} />
-            </Pressable>
-            <Text style={styles.compteurValeur}>{membres}</Text>
-            <Pressable
-              onPress={() => setMembres((valeur) => Math.min(30, valeur + 1))}
-              accessibilityLabel="Ajouter un membre"
-              style={({ pressed }) => [
-                styles.compteurBouton,
-                pressed && styles.presse,
-              ]}
-            >
-              <MaterialIcons name="add" size={20} color={colors.text} />
-            </Pressable>
+        <View style={styles.champCarte}>
+          <View style={styles.champEntete}>
+            <View style={styles.champIcone}>
+              <MaterialIcons
+                name="shuffle"
+                size={16}
+                color={colors.purple}
+              />
+            </View>
+            <Text style={styles.libelle}>Ordre de réception</Text>
           </View>
-
-          <Text style={styles.label}>Date de début</Text>
-          <Pressable
-            onPress={() => setCalendrier(true)}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.dateChamp, pressed && styles.presse]}
-          >
-            <MaterialIcons name="event" size={17} color={colors.purple} />
-            <Text style={styles.dateTexte}>{formatDateLongue(dateDebut)}</Text>
-            <MaterialIcons name="chevron-right" size={18} color={colors.textFaint} />
-          </Pressable>
-
-          <View style={styles.note}>
-            <MaterialIcons name="verified-user" size={16} color={colors.green} />
-            <Text style={styles.noteTexte}>
-              Règles et paiements restent visibles par tous les membres.
-            </Text>
+          <View style={styles.radios}>
+            <RadioRow
+              label="Tirage aléatoire"
+              description="Personne ne peut prévoir son tour"
+              selected={ordre === 'aleatoire'}
+              onPress={() => setOrdre('aleatoire')}
+            />
+            <RadioRow
+              label="Ordre défini"
+              description="Le gestionnaire fixe l’ordre à l’avance"
+              selected={ordre === 'defini'}
+              onPress={() => setOrdre('defini')}
+            />
           </View>
+        </View>
 
-          <PrimaryButton
-            label="Créer ma tontine"
-            onPress={creerTontine}
-            disabled={!valide}
-            variant="purple"
-            rightIcon="arrow-forward"
-            style={styles.bouton}
+        <View style={styles.champCarte}>
+          <View style={styles.champEntete}>
+            <View style={styles.champIcone}>
+              <MaterialIcons name="group" size={16} color={colors.purple} />
+            </View>
+            <Text style={styles.libelle}>Nombre de membres</Text>
+          </View>
+          <TextInput
+            value={nombreMembres}
+            onChangeText={setNombreMembres}
+            keyboardType="number-pad"
+            placeholder="Ex. 8"
+            placeholderTextColor={colors.textFaint}
+            style={styles.saisieNombre}
+            accessibilityLabel="Nombre de membres"
           />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+
+        <Text style={styles.sousSection}>Options</Text>
+
+        <CheckboxRow
+          label="Tous les paiements sont enregistrés"
+          value={paiementsEnregistres}
+          onToggle={setPaiementsEnregistres}
+        />
+        <CheckboxRow
+          label="Les prévues sont obligatoires"
+          value={prevuesObligatoires}
+          onToggle={setPrevuesObligatoires}
+        />
+        <CheckboxRow
+          label="Les membres voient l’historique"
+          value={membresVoientHistorique}
+          onToggle={setMembresVoientHistorique}
+        />
+      </ScrollView>
+
+      <View style={styles.pied}>
+        <PrimaryButton
+          label="Créer la tontine"
+          onPress={creerTontine}
+          variant="green"
+          height={58}
+          rightIcon="arrow-forward"
+          labelStyle={styles.boutonLabel}
+        />
+      </View>
 
       <DatePickerModal
         visible={calendrier}
         value={dateDebut}
+        minimumDate={new Date()}
+        title="Date de début"
         onCancel={() => setCalendrier(false)}
         onConfirm={(date) => {
           setDateDebut(date);
@@ -238,157 +247,136 @@ const makeStyles = (c: Palette) =>
     },
     flex: { flex: 1 },
     contenu: {
-      paddingHorizontal: 20,
+      paddingHorizontal: screenPadding,
       paddingTop: 18,
-      paddingBottom: 28,
+      paddingBottom: 24,
     },
-    pastille: {
-      alignSelf: 'center',
-      marginTop: 22,
-      width: 62,
-      height: 62,
-      borderRadius: 20,
+    entete: {
+      marginTop: 14,
+      fontSize: 13,
+      lineHeight: 19,
+      color: c.textMuted,
+    },
+    champCarte: {
+      marginTop: 14,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      backgroundColor: c.card,
+      padding: 16,
+    },
+    champEntete: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    champIcone: {
+      width: 26,
+      height: 26,
+      borderRadius: 9,
       backgroundColor: c.purpleSoft,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    titre: {
-      marginTop: 16,
-      marginBottom: 14,
-      fontSize: 20,
-      lineHeight: 26,
-      fontWeight: '700',
-      color: c.text,
-      textAlign: 'center',
-    },
-    saisieNom: {
-      height: 50,
-      borderWidth: 1,
-      borderColor: c.border,
-      borderRadius: radius.field,
-      paddingHorizontal: 14,
-      fontSize: 15,
-      color: c.text,
-      backgroundColor: c.card,
-    },
-    label: {
-      marginTop: 22,
-      marginBottom: 10,
-      fontSize: 13.5,
-      fontWeight: '600',
-      color: c.text,
-    },
-    frequences: {
-      flexDirection: 'row',
-      gap: 10,
-    },
-    frequence: {
-      flex: 1,
-      height: 48,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      borderRadius: radius.field,
-      borderWidth: 1,
-      borderColor: c.border,
-      backgroundColor: c.card,
-    },
-    frequenceActive: {
-      backgroundColor: c.purpleSolid,
-      borderColor: c.purpleSolid,
-    },
-    frequenceTexte: {
-      fontSize: 13.5,
-      fontWeight: '600',
-      color: c.textMuted,
-    },
-    frequenceTexteActif: {
-      color: c.onAccent,
-    },
-    presse: {
-      opacity: 0.8,
-    },
-    montantChamp: {
-      height: 50,
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: c.border,
-      borderRadius: radius.field,
-      paddingHorizontal: 14,
-      backgroundColor: c.card,
-    },
-    montantSaisie: {
-      flex: 1,
-      fontSize: 15,
-      color: c.text,
-      paddingVertical: 0,
-    },
-    devise: {
-      fontSize: 12.5,
-      fontWeight: '600',
-      color: c.textMuted,
-    },
-    compteur: {
-      height: 50,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderWidth: 1,
-      borderColor: c.border,
-      borderRadius: radius.field,
-      paddingHorizontal: 8,
-      backgroundColor: c.card,
-    },
-    compteurBouton: {
-      width: 40,
-      height: 38,
-      borderRadius: radius.small,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.cardMuted,
-    },
-    compteurInactif: {
-      opacity: 0.4,
-    },
-    compteurValeur: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: c.text,
-    },
-    dateChamp: {
-      height: 50,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-      borderWidth: 1,
-      borderColor: c.border,
-      borderRadius: radius.field,
-      paddingHorizontal: 14,
-      backgroundColor: c.card,
-    },
-    dateTexte: {
-      flex: 1,
-      fontSize: 14.5,
-      color: c.text,
-    },
-    note: {
-      marginTop: 18,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      padding: 12,
-      borderRadius: radius.field,
-      backgroundColor: c.greenSoft,
-    },
-    noteTexte: {
+    libelle: {
       flex: 1,
       fontSize: 12,
-      lineHeight: 17,
-      color: c.green,
+      fontWeight: '700',
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
     },
-    bouton: {
+    valeur: {
+      marginTop: 12,
+      fontSize: 22,
+      fontWeight: '700',
+      color: c.text,
+      letterSpacing: 0,
+    },
+    radios: {
+      marginTop: 12,
+      gap: 8,
+    },
+    radioLigne: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      backgroundColor: c.background,
+    },
+    radioLigneActive: {
+      borderColor: c.green,
+      backgroundColor: c.greenSoft,
+    },
+    presse: {
+      opacity: 0.85,
+    },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: c.borderStrong,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 10,
+    },
+    radioActif: {
+      borderColor: c.green,
+    },
+    radioPoint: {
+      width: 9,
+      height: 9,
+      borderRadius: 5,
+      backgroundColor: c.green,
+    },
+    radioTexte: {
+      flex: 1,
+    },
+    radioLabel: {
+      fontSize: 14.5,
+      fontWeight: '600',
+      color: c.text,
+    },
+    radioDescription: {
+      marginTop: 2,
+      fontSize: 11.5,
+      color: c.textFaint,
+    },
+    saisieNombre: {
+      marginTop: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      fontSize: 18,
+      fontWeight: '600',
+      color: c.text,
+      backgroundColor: c.background,
+    },
+    sousSection: {
       marginTop: 22,
+      marginBottom: 10,
+      fontSize: 12,
+      fontWeight: '700',
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    pied: {
+      paddingHorizontal: screenPadding,
+      paddingTop: 12,
+      paddingBottom: 20,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+      backgroundColor: c.background,
+    },
+    boutonLabel: {
+      fontSize: 17,
+      fontWeight: '700',
     },
   });

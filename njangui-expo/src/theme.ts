@@ -1,5 +1,5 @@
 /**
- * Jetons de design Njangui — alignés sur le design system du guide UIUX.
+ * Jetons de design de Njangui.
  *
  * Chaque écran ne lit que des couleurs sémantiques (`background`, `card`,
  * `text`, `purple`…). Les palettes `light` et `dark` fournissent la même
@@ -8,7 +8,7 @@
  *
  * Règle de couleur : les surfaces restent neutres, les accents servent à
  * signaler (statut, action, montant) et couvrent moins d'un dixième de
- * l'écran.
+ * l'écran. Les contrastes de corps de texte visent 4,5–7:1, pas le maximum.
  */
 export type Palette = {
   /** Fond principal des écrans. */
@@ -30,10 +30,6 @@ export type Palette = {
   purple: string;
   purpleSolid: string;
   purpleSoft: string;
-  purpleSecondary: string;
-
-  /** Surface « premium » de la carte d'accueil et des en-têtes. */
-  navy: string;
 
   mint: string;
   mintSoft: string;
@@ -53,10 +49,7 @@ export type Palette = {
   blue: string;
   blueSoft: string;
 
-  warning: string;
-  warningSoft: string;
-
-  /** Texte/icônes posés sur une surface pleine (purple, navy, red…). */
+  /** Texte/icônes posés sur une surface pleine (purple, green, red…). */
   onAccent: string;
   toast: string;
   scrim: string;
@@ -68,136 +61,100 @@ export type Palette = {
 };
 
 export const light: Palette = {
-  background: '#F8F7FC',
-  backgroundAlt: '#F1EFF8',
+  background: '#FFFFFF',
+  backgroundAlt: '#F6F8F7',
   card: '#FFFFFF',
-  cardMuted: '#F3F1F9',
+  cardMuted: '#F2F5F4',
 
-  text: '#202033',
-  textMuted: '#777783',
-  textFaint: '#9A98AA',
+  text: '#101614',
+  textMuted: '#4A5451',
+  textFaint: '#6B7570',
 
-  border: '#E9E5EF',
-  borderStrong: '#D6D1E0',
+  border: '#E4E9E7',
+  borderStrong: '#C7CFCB',
 
-  purple: '#71358A',
-  purpleSolid: '#71358A',
-  purpleSoft: 'rgba(113,53,138,0.09)',
-  purpleSecondary: '#963BB5',
+  purple: '#6E2B7C',
+  purpleSolid: '#6E2B7C',
+  purpleSoft: 'rgba(110,43,124,0.08)',
 
-  navy: '#101747',
+  mint: '#8FE6CA',
+  mintSoft: '#EAF7F2',
+  onMint: '#10211C',
 
-  mint: '#90EED4',
-  mintSoft: '#E7FBF6',
-  onMint: '#0B2019',
+  green: '#2E8F68',
+  greenSolid: '#2E8F68',
+  greenSoft: '#E7F4EE',
 
-  green: '#2E9E6E',
-  greenSolid: '#2E9E6E',
-  greenSoft: '#E6F6EF',
+  teal: '#2A8390',
+  tealSoft: 'rgba(42,131,144,0.10)',
 
-  teal: '#1F8FA6',
-  tealSoft: 'rgba(31,143,166,0.10)',
+  red: '#C4453C',
+  redDark: '#A8372F',
+  redSoft: '#FBEDEC',
 
-  red: '#D94B58',
-  redDark: '#BC3A47',
-  redSoft: '#FCEDEF',
-
-  blue: '#3978D5',
-  blueSoft: 'rgba(57,120,213,0.10)',
-
-  warning: '#E6A23C',
-  warningSoft: 'rgba(230,162,60,0.14)',
+  blue: '#2F6FB8',
+  blueSoft: 'rgba(47,111,184,0.10)',
 
   onAccent: '#FFFFFF',
-  toast: '#1E1F2C',
-  scrim: 'rgba(16,23,71,0.45)',
-  shadow: '#101747',
+  toast: '#232B29',
+  scrim: 'rgba(9,14,12,0.45)',
+  shadow: '#0F211B',
 
-  decorA: 'rgba(113,53,138,0.07)',
-  decorB: 'rgba(144,238,212,0.18)',
+  decorA: 'rgba(110,43,124,0.06)',
+  decorB: 'rgba(46,143,104,0.07)',
 };
 
 export const dark: Palette = {
-  background: '#10121B',
-  backgroundAlt: '#151827',
-  card: '#191B27',
-  cardMuted: '#212432',
+  background: '#0F1412',
+  backgroundAlt: '#141B18',
+  card: '#161C1A',
+  cardMuted: '#1B2320',
 
-  text: '#F4F4F8',
-  textMuted: '#A5A6B4',
-  textFaint: '#7E7F90',
+  text: '#E8EEEB',
+  textMuted: '#9AA69F',
+  textFaint: '#7A857F',
 
-  border: '#292B35',
-  borderStrong: '#3A3C49',
+  border: '#26302C',
+  borderStrong: '#35423C',
 
-  purple: '#963BB5',
-  purpleSolid: '#8A38A8',
-  purpleSoft: 'rgba(150,59,181,0.18)',
-  purpleSecondary: '#B15FD0',
+  purple: '#C9A2D9',
+  purpleSolid: '#7B3A8B',
+  purpleSoft: 'rgba(201,162,217,0.14)',
 
-  navy: '#181C33',
+  mint: '#6FD3B3',
+  mintSoft: 'rgba(111,211,179,0.12)',
+  onMint: '#0B1A15',
 
-  mint: '#90EED4',
-  mintSoft: 'rgba(144,238,212,0.12)',
-  onMint: '#0B2019',
+  green: '#57BE92',
+  greenSolid: '#2E8F68',
+  greenSoft: 'rgba(87,190,146,0.13)',
 
-  green: '#4CB88A',
-  greenSolid: '#2E9E6E',
-  greenSoft: 'rgba(76,184,138,0.14)',
+  teal: '#6EC5D2',
+  tealSoft: 'rgba(110,197,210,0.14)',
 
-  teal: '#6FC7DA',
-  tealSoft: 'rgba(111,199,218,0.14)',
+  red: '#E5807A',
+  redDark: '#C4625C',
+  redSoft: 'rgba(229,128,122,0.14)',
 
-  red: '#E8737C',
-  redDark: '#D94B58',
-  redSoft: 'rgba(232,115,124,0.15)',
-
-  blue: '#7FA8E8',
-  blueSoft: 'rgba(127,168,232,0.15)',
-
-  warning: '#E6A23C',
-  warningSoft: 'rgba(230,162,60,0.16)',
+  blue: '#7FB4E8',
+  blueSoft: 'rgba(127,180,232,0.14)',
 
   onAccent: '#FFFFFF',
-  toast: '#232637',
-  scrim: 'rgba(0,0,0,0.62)',
+  toast: '#1E2724',
+  scrim: 'rgba(0,0,0,0.6)',
   shadow: '#000000',
 
-  decorA: 'rgba(150,59,181,0.12)',
-  decorB: 'rgba(144,238,212,0.07)',
+  decorA: 'rgba(201,162,217,0.08)',
+  decorB: 'rgba(111,211,179,0.06)',
 };
 
 /** Raccourci historique (thème clair) — conservé pour les rares usages figés. */
 export const colors = light;
 
-/** Échelle de rayons du design system. */
 export const radius = {
-  small: 8,
+  card: 16,
   field: 12,
-  button: 16,
-  card: 18,
-  container: 24,
-  pill: 999,
-};
-
-/** Système d'espacement 8 points. */
-export const space = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-};
-
-/** Échelle typographique du guide. */
-export const type = {
-  display: 32,
-  h1: 28,
-  h2: 22,
-  h3: 18,
-  body: 15,
-  small: 13,
-  label: 12,
+  pill: 22,
 };
 
 export const screenPadding = 20;

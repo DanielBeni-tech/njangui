@@ -42,8 +42,8 @@ export default function CouvertureScreen() {
       >
         <LogoMark size={176} />
 
-        <Text style={styles.nom}>Njangui</Text>
-        <Text style={styles.hook}>La tontine, sans conflit</Text>
+        <Text style={styles.nom}>NJANGUI</Text>
+        <Text style={styles.hook}>La tontine sans conflit</Text>
       </Animated.View>
 
       <Animated.View style={[styles.bas, { opacity: entree }]}>
@@ -76,9 +76,10 @@ const makeStyles = (c: Palette) =>
       paddingBottom: 24,
     },
     nom: {
-      marginTop: 24,
-      fontSize: 34,
+      marginTop: 26,
+      fontSize: 26,
       fontWeight: '700',
+      letterSpacing: 7,
       color: c.text,
       textAlign: 'center',
     },

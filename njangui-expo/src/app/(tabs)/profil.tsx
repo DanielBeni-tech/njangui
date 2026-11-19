@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { Palette, radius, screenPadding } from '../../theme';
+import { Palette, screenPadding } from '../../theme';
 import { useStyles, useTheme } from '../../store/Theme';
 import { useAppData } from '../../store/AppData';
 import { useAuth } from '../../store/Auth';
@@ -19,32 +18,26 @@ import { useNotifications } from '../../store/Notifications';
 import { useToast } from '../../ui/Toast';
 import { ThemeSwitch } from '../../ui/ThemeSwitch';
 
-type RowProps = {
+type InfoTileProps = {
   icone: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  onPress: () => void;
-  valeur?: string;
+  titre: string;
+  valeur: string;
 };
 
 export default function ProfilScreen() {
   const styles = useStyles(makeStyles);
   const { colors, scheme } = useTheme();
-  const { tontines, nonLues } = useAppData();
+  const { tontines } = useAppData();
   const { signOut } = useAuth();
   const { enabled, permission, setEnabled, envoyerTest } = useNotifications();
   const toast = useToast();
 
-  const Row = ({ icone, label, onPress, valeur }: RowProps) => (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => [styles.row, pressed && styles.presse]}
-    >
-      <MaterialIcons name={icone} size={19} color={colors.purple} />
-      <Text style={styles.rowLabel}>{label}</Text>
-      {valeur ? <Text style={styles.rowValeur}>{valeur}</Text> : null}
-      <MaterialIcons name="chevron-right" size={18} color={colors.textFaint} />
-    </Pressable>
+  const InfoTile = ({ icone, titre, valeur }: InfoTileProps) => (
+    <View style={styles.info}>
+      <MaterialIcons name={icone} size={18} color={colors.textFaint} />
+      <Text style={styles.infoTitre}>{titre}</Text>
+      <Text style={styles.infoValeur}>{valeur}</Text>
+    </View>
   );
 
   const etatNotifications =
@@ -67,7 +60,10 @@ export default function ProfilScreen() {
       }
     }
     const envoye = await envoyerTest();
-    toast(envoye ? 'Notification envoyée' : 'Envoi impossible', envoye ? 'success' : 'error');
+    toast(
+      envoye ? 'Notification envoyée' : 'Envoi impossible',
+      envoye ? 'success' : 'error',
+    );
   };
 
   return (
@@ -78,61 +74,48 @@ export default function ProfilScreen() {
       >
         <View style={styles.identite}>
           <View style={styles.avatar}>
-            <Text style={styles.initiales}>MD</Text>
+            <MaterialIcons name="person" size={38} color={colors.onMint} />
           </View>
           <View style={styles.identiteTexte}>
-            <Text style={styles.nom}>Mégane T.</Text>
+            <Text style={styles.nom}>Mégane Dupont</Text>
             <Text style={styles.numero}>+237 658 834 387</Text>
           </View>
         </View>
 
-        <View style={styles.carte}>
-          <Row
+        <View style={styles.carteInfos}>
+          <InfoTile
             icone="groups"
-            label="Mes tontines"
+            titre="Tontines"
             valeur={String(tontines.length)}
-            onPress={() => router.push('/tontines')}
           />
           <View style={styles.separateur} />
-          <Row
-            icone="notifications"
-            label="Notifications"
-            valeur={nonLues > 0 ? String(nonLues) : undefined}
-            onPress={() => router.push('/alertes')}
-          />
-          <View style={styles.separateur} />
-          <Row
-            icone="add-circle-outline"
-            label="Créer une tontine"
-            onPress={() => router.push('/creation')}
-          />
-          <View style={styles.separateur} />
-          <Row
-            icone="group-add"
-            label="Rejoindre une tontine"
-            onPress={() => router.push('/rejoindre')}
-          />
+          <InfoTile icone="calendar-today" titre="Membre depuis" valeur="Janvier 2024" />
         </View>
 
         <Text style={styles.sectionTitre}>Apparence</Text>
-        <View style={styles.cartePleine}>
+        <View style={styles.carte}>
           <View style={styles.ligneTitre}>
             <MaterialIcons
               name={scheme === 'dark' ? 'dark-mode' : 'light-mode'}
-              size={19}
-              color={colors.purple}
+              size={18}
+              color={colors.textMuted}
             />
             <Text style={styles.ligneTitreTexte}>
-              {scheme === 'dark' ? 'Thème sombre' : 'Thème clair'}
+              {scheme === 'dark' ? 'Sombre' : 'Clair'}
             </Text>
           </View>
           <ThemeSwitch />
         </View>
 
         <Text style={styles.sectionTitre}>Notifications</Text>
-        <View style={styles.cartePleine}>
-          <View style={styles.notifLigne}>
-            <View style={styles.notifTexte}>
+        <View style={styles.carte}>
+          <View style={styles.ligneTitre}>
+            <MaterialIcons
+              name="notifications-none"
+              size={18}
+              color={colors.textMuted}
+            />
+            <View style={styles.ligneTexte}>
               <Text style={styles.ligneTitreTexte}>Alertes sur le téléphone</Text>
               <Text style={styles.ligneSousTitre}>{etatNotifications}</Text>
             </View>
@@ -153,6 +136,7 @@ export default function ProfilScreen() {
               accessibilityLabel="Activer les notifications"
             />
           </View>
+
           {Platform.OS !== 'web' ? (
             <Pressable
               onPress={test}
@@ -165,7 +149,10 @@ export default function ProfilScreen() {
 
         <Pressable
           onPress={signOut}
-          style={({ pressed }) => [styles.deconnexion, pressed && styles.presse]}
+          style={({ pressed }) => [
+            styles.deconnexion,
+            pressed && { opacity: 0.85 },
+          ]}
         >
           <Text style={styles.deconnexionTexte}>Se déconnecter</Text>
         </Pressable>
@@ -193,14 +180,9 @@ const makeStyles = (c: Palette) =>
       width: 64,
       height: 64,
       borderRadius: 32,
-      backgroundColor: c.purpleSoft,
+      backgroundColor: c.mint,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    initiales: {
-      fontSize: 21,
-      fontWeight: '700',
-      color: c.purple,
     },
     identiteTexte: {
       marginLeft: 14,
@@ -216,38 +198,34 @@ const makeStyles = (c: Palette) =>
       fontSize: 13.5,
       color: c.textMuted,
     },
-    carte: {
+    carteInfos: {
       marginTop: 22,
-      borderRadius: radius.card,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
       backgroundColor: c.card,
-      overflow: 'hidden',
+      paddingHorizontal: 14,
+      paddingVertical: 4,
     },
-    row: {
+    info: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
-      paddingHorizontal: 14,
-      height: 54,
+      gap: 10,
+      paddingVertical: 12,
     },
-    rowLabel: {
+    infoTitre: {
       flex: 1,
-      fontSize: 14.5,
-      color: c.text,
-    },
-    rowValeur: {
-      fontSize: 13,
-      fontWeight: '600',
+      fontSize: 13.5,
       color: c.textMuted,
+    },
+    infoValeur: {
+      fontSize: 13.5,
+      fontWeight: '600',
+      color: c.text,
     },
     separateur: {
       height: 1,
-      marginLeft: 45,
       backgroundColor: c.border,
-    },
-    presse: {
-      opacity: 0.7,
     },
     sectionTitre: {
       marginTop: 24,
@@ -258,8 +236,8 @@ const makeStyles = (c: Palette) =>
       textTransform: 'uppercase',
       letterSpacing: 0.8,
     },
-    cartePleine: {
-      borderRadius: radius.card,
+    carte: {
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
       backgroundColor: c.card,
@@ -271,19 +249,14 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       gap: 10,
     },
+    ligneTexte: {
+      flex: 1,
+    },
     ligneTitreTexte: {
       flex: 1,
       fontSize: 14.5,
       fontWeight: '600',
       color: c.text,
-    },
-    notifLigne: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    notifTexte: {
-      flex: 1,
     },
     ligneSousTitre: {
       marginTop: 2,
@@ -293,22 +266,24 @@ const makeStyles = (c: Palette) =>
     },
     test: {
       alignSelf: 'flex-start',
-      paddingVertical: 4,
+      paddingVertical: 6,
     },
     testTexte: {
       fontSize: 13,
       fontWeight: '600',
       color: c.purple,
     },
+    presse: {
+      opacity: 0.7,
+    },
     deconnexion: {
       marginTop: 26,
       height: 50,
-      borderRadius: radius.button,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: c.border,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.card,
     },
     deconnexionTexte: {
       fontSize: 14.5,

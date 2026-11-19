@@ -1,13 +1,26 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Palette, radius, screenPadding } from '../../theme';
+import { Palette, screenPadding } from '../../theme';
 import { useStyles, useTheme } from '../../store/Theme';
 import { Logo } from '../../ui/Logo';
 import { TontineCard } from '../../ui/TontineCard';
 import { useAppData } from '../../store/AppData';
+
+type ActionRapideProps = {
+  icone: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  onPress: () => void;
+  principal?: boolean;
+};
 
 export default function AccueilScreen() {
   const styles = useStyles(makeStyles);
@@ -17,6 +30,37 @@ export default function AccueilScreen() {
   const membres = tontines.reduce((total, t) => total + t.membres.length, 0);
   const enCours = tontines.filter((t) => t.enCours).length;
 
+  const ActionRapide = ({
+    icone,
+    label,
+    onPress,
+    principal = false,
+  }: ActionRapideProps) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => [
+        styles.action,
+        principal && styles.actionPrincipale,
+        pressed && styles.presse,
+      ]}
+    >
+      <MaterialIcons
+        name={icone}
+        size={19}
+        color={principal ? colors.onAccent : colors.text}
+      />
+      <Text
+        style={[
+          styles.actionTexte,
+          principal && styles.actionTextePrincipale,
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+
   return (
     <SafeAreaView style={styles.ecran} edges={['top']}>
       <ScrollView
@@ -24,13 +68,7 @@ export default function AccueilScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.entete}>
-          <View style={styles.marque}>
-            <Logo size={42} />
-            <View style={styles.marqueTexte}>
-              <Text style={styles.nom}>Njangui</Text>
-              <Text style={styles.signature}>La tontine, sans conflit</Text>
-            </View>
-          </View>
+          <Logo size={30} withName nameSize={14} />
 
           <Pressable
             onPress={() => router.push('/alertes')}
@@ -40,65 +78,41 @@ export default function AccueilScreen() {
           >
             <MaterialIcons
               name={nonLues > 0 ? 'notifications' : 'notifications-none'}
-              size={21}
+              size={20}
               color={colors.text}
             />
-            {nonLues > 0 ? <View style={styles.pastille} /> : null}
+            {nonLues > 0 ? <View style={styles.badge} /> : null}
           </Pressable>
         </View>
 
         <Text style={styles.bonjour}>Bonjour Mégane</Text>
-        <Text style={styles.sousBonjour}>
-          Voici l’état de vos tontines aujourd’hui.
-        </Text>
 
-        <View style={styles.hero}>
-          <View style={styles.heroIcone}>
-            <MaterialIcons name="verified-user" size={19} color={colors.mint} />
-          </View>
-          <Text style={styles.heroTitre}>
-            Créez vos tontines en toute transparence
-          </Text>
-          <Text style={styles.heroTexte}>
-            Règles claires, paiements suivis, zéro conflit.
-          </Text>
-
-          <View style={styles.heroActions}>
-            <Pressable
-              onPress={() => router.push('/creation')}
-              style={({ pressed }) => [styles.heroBouton, pressed && styles.presse]}
-            >
-              <MaterialIcons name="add" size={18} color={colors.navy} />
-              <Text style={styles.heroBoutonTexte}>Créer</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => router.push('/rejoindre')}
-              style={({ pressed }) => [
-                styles.heroBoutonFantome,
-                pressed && styles.presse,
-              ]}
-            >
-              <MaterialIcons name="group-add" size={18} color={colors.onAccent} />
-              <Text style={styles.heroBoutonFantomeTexte}>Rejoindre</Text>
-            </Pressable>
-          </View>
+        <View style={styles.actions}>
+          <ActionRapide
+            icone="add"
+            label="Créer"
+            principal
+            onPress={() => router.push('/creation')}
+          />
+          <ActionRapide
+            icone="group-add"
+            label="Rejoindre"
+            onPress={() => router.push('/rejoindre')}
+          />
         </View>
 
         <View style={styles.stats}>
           <View style={styles.stat}>
-            <MaterialIcons name="groups" size={18} color={colors.purple} />
             <Text style={styles.statValeur}>{tontines.length}</Text>
             <Text style={styles.statLabel}>Tontines</Text>
           </View>
           <View style={styles.separateur} />
           <View style={styles.stat}>
-            <MaterialIcons name="people" size={18} color={colors.teal} />
             <Text style={styles.statValeur}>{membres}</Text>
             <Text style={styles.statLabel}>Membres</Text>
           </View>
           <View style={styles.separateur} />
           <View style={styles.stat}>
-            <MaterialIcons name="event-available" size={18} color={colors.green} />
             <Text style={styles.statValeur}>{enCours}</Text>
             <Text style={styles.statLabel}>En cours</Text>
           </View>
@@ -107,20 +121,19 @@ export default function AccueilScreen() {
         <View style={styles.sectionLigne}>
           <Text style={styles.section}>Mes tontines</Text>
           {tontines.length > 0 ? (
-            <Pressable
-              onPress={() => router.push('/tontines')}
-              hitSlop={10}
-              style={({ pressed }) => [styles.voir, pressed && styles.presse]}
-            >
-              <Text style={styles.voirTexte}>Tout voir</Text>
-              <MaterialIcons name="arrow-forward" size={14} color={colors.purple} />
+            <Pressable onPress={() => router.push('/tontines')} hitSlop={10}>
+              <Text style={styles.voirTout}>Tout voir</Text>
             </Pressable>
           ) : null}
         </View>
 
         {tontines.length === 0 ? (
           <View style={styles.vide}>
-            <MaterialIcons name="groups" size={34} color={colors.textFaint} />
+            <MaterialIcons
+              name="groups"
+              size={34}
+              color={colors.textFaint}
+            />
             <Text style={styles.videTitre}>Aucune tontine</Text>
             <Text style={styles.videTexte}>
               Créez la vôtre ou entrez un code d’invitation.
@@ -161,37 +174,18 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       justifyContent: 'space-between',
     },
-    marque: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    marqueTexte: {
-      marginLeft: 10,
-    },
-    nom: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: c.text,
-    },
-    signature: {
-      marginTop: 1,
-      fontSize: 10.5,
-      color: c.textMuted,
-    },
     cloche: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: c.card,
-      borderWidth: 1,
-      borderColor: c.border,
+      backgroundColor: c.cardMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    pastille: {
+    badge: {
       position: 'absolute',
-      top: 9,
-      right: 10,
+      top: 10,
+      right: 11,
       width: 8,
       height: 8,
       borderRadius: 4,
@@ -201,107 +195,65 @@ const makeStyles = (c: Palette) =>
       opacity: 0.75,
     },
     bonjour: {
-      marginTop: 24,
-      fontSize: 26,
+      marginTop: 26,
+      fontSize: 23,
       fontWeight: '700',
       color: c.text,
     },
-    sousBonjour: {
-      marginTop: 4,
-      fontSize: 13.5,
-      color: c.textMuted,
-    },
-    hero: {
-      marginTop: 16,
-      backgroundColor: c.navy,
-      borderRadius: radius.container,
-      padding: 18,
-    },
-    heroIcone: {
-      width: 38,
-      height: 38,
-      borderRadius: 12,
-      backgroundColor: 'rgba(255,255,255,0.10)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    heroTitre: {
-      marginTop: 14,
-      fontSize: 17,
-      lineHeight: 23,
-      fontWeight: '700',
-      color: c.onAccent,
-    },
-    heroTexte: {
-      marginTop: 6,
-      fontSize: 12.5,
-      lineHeight: 18,
-      color: 'rgba(255,255,255,0.72)',
-    },
-    heroActions: {
+    actions: {
       marginTop: 16,
       flexDirection: 'row',
       gap: 10,
     },
-    heroBouton: {
+    action: {
+      flex: 1,
+      height: 52,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 6,
-      paddingHorizontal: 18,
-      height: 42,
-      borderRadius: radius.button,
-      backgroundColor: c.onAccent,
-    },
-    heroBoutonTexte: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: c.navy,
-    },
-    heroBoutonFantome: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      paddingHorizontal: 18,
-      height: 42,
-      borderRadius: radius.button,
+      gap: 7,
+      borderRadius: 14,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.35)',
+      borderColor: c.border,
+      backgroundColor: c.card,
     },
-    heroBoutonFantomeTexte: {
-      fontSize: 14,
+    actionPrincipale: {
+      backgroundColor: c.purpleSolid,
+      borderColor: c.purpleSolid,
+    },
+    actionTexte: {
+      fontSize: 14.5,
       fontWeight: '600',
+      color: c.text,
+    },
+    actionTextePrincipale: {
       color: c.onAccent,
     },
     stats: {
       marginTop: 14,
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: c.card,
-      borderRadius: radius.card,
-      borderWidth: 1,
-      borderColor: c.border,
-      paddingVertical: 16,
+      backgroundColor: c.backgroundAlt,
+      borderRadius: 14,
+      paddingVertical: 13,
     },
     stat: {
       flex: 1,
       alignItems: 'center',
-      gap: 2,
     },
     statValeur: {
-      marginTop: 4,
       fontSize: 19,
       fontWeight: '700',
       color: c.text,
     },
     statLabel: {
+      marginTop: 2,
       fontSize: 11.5,
-      color: c.textMuted,
+      color: c.textFaint,
     },
     separateur: {
       width: 1,
-      height: 34,
+      height: 26,
       backgroundColor: c.border,
     },
     sectionLigne: {
@@ -312,16 +264,11 @@ const makeStyles = (c: Palette) =>
       justifyContent: 'space-between',
     },
     section: {
-      fontSize: 17,
+      fontSize: 16.5,
       fontWeight: '700',
       color: c.text,
     },
-    voir: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    voirTexte: {
+    voirTout: {
       fontSize: 13,
       fontWeight: '600',
       color: c.purple,
@@ -330,10 +277,8 @@ const makeStyles = (c: Palette) =>
       alignItems: 'center',
       paddingVertical: 30,
       paddingHorizontal: 24,
-      borderRadius: radius.card,
-      backgroundColor: c.card,
-      borderWidth: 1,
-      borderColor: c.border,
+      borderRadius: 14,
+      backgroundColor: c.backgroundAlt,
     },
     videTitre: {
       marginTop: 10,
