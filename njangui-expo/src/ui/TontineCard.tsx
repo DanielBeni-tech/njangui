@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Palette } from '../theme';
+import { Palette, radius } from '../theme';
 import { useStyles, useTheme } from '../store/Theme';
 import { Tontine } from '../types';
 import { formatMontant } from '../utils/format';
@@ -19,6 +19,10 @@ export function TontineCard({ tontine, onPress }: Props) {
   const total = tontine.membres.length;
   const ratio = total === 0 ? 0 : payes / total;
 
+  const badge = tontine.enCours
+    ? { texte: 'En cours', couleur: colors.green, fond: colors.greenSoft }
+    : { texte: 'À venir', couleur: colors.purple, fond: colors.purpleSoft };
+
   return (
     <Pressable
       onPress={onPress}
@@ -26,102 +30,51 @@ export function TontineCard({ tontine, onPress }: Props) {
       accessibilityLabel={`Tontine ${tontine.nom}`}
       style={({ pressed }) => [styles.card, pressed && styles.presse]}
     >
-      <View
-        style={[
-          styles.accent,
-          {
-            backgroundColor: tontine.enCours ? colors.green : colors.purple,
-          },
-        ]}
-      />
-
-      <View style={styles.corps}>
-        <View style={styles.ligneTitre}>
-          <View style={styles.titreZone}>
-            <Text style={styles.nom} numberOfLines={1}>
-              {tontine.nom}
-            </Text>
-            <Text style={styles.montant}>
-              {formatMontant(tontine.montant)} FCFA / {tontine.frequence}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.etat,
-              {
-                backgroundColor: tontine.enCours
-                  ? colors.greenSoft
-                  : colors.purpleSoft,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.point,
-                {
-                  backgroundColor: tontine.enCours
-                    ? colors.green
-                    : colors.purple,
-                },
-              ]}
-            />
-            <Text
-              style={[
-                styles.etatTexte,
-                {
-                  color: tontine.enCours ? colors.green : colors.purple,
-                },
-              ]}
-            >
-              {tontine.enCours ? 'En cours' : 'À venir'}
-            </Text>
-          </View>
+      <View style={styles.haut}>
+        <View style={styles.vignette}>
+          <MaterialIcons name="diversity-3" size={22} color={colors.purple} />
         </View>
 
-        <View style={styles.pied}>
-          <View style={styles.piedBloc}>
-            <MaterialIcons
-              name="event"
-              size={14}
-              color={colors.textFaint}
-            />
-            <Text style={styles.piedTexte}>
-              {tontine.enCours
-                ? tontine.prochaineEcheance
-                : tontine.prochaineEcheance}
-            </Text>
-          </View>
-
-          <View style={styles.piedBloc}>
-            <MaterialIcons
-              name="group"
-              size={14}
-              color={colors.textFaint}
-            />
-            <Text style={styles.piedTexte}>
-              {payes}/{total} payés
-            </Text>
-          </View>
-
-          <MaterialIcons
-            name="chevron-right"
-            size={20}
-            color={colors.textFaint}
-          />
+        <View style={styles.titreZone}>
+          <Text style={styles.nom} numberOfLines={1}>
+            {tontine.nom}
+          </Text>
+          <Text style={styles.montant}>
+            {formatMontant(tontine.montant)} FCFA / {tontine.frequence}
+          </Text>
         </View>
 
-        <View style={styles.piste}>
-          <View
-            style={[
-              styles.pisteRemplie,
-              {
-                width: `${Math.round(ratio * 100)}%`,
-                backgroundColor: ratio === 1 ? colors.green : colors.mint,
-              },
-            ]}
-          />
+        <View style={[styles.badge, { backgroundColor: badge.fond }]}>
+          <Text style={[styles.badgeTexte, { color: badge.couleur }]}>
+            {badge.texte}
+          </Text>
         </View>
+      </View>
+
+      <View style={styles.pied}>
+        <View style={styles.piedBloc}>
+          <MaterialIcons name="event" size={13} color={colors.textFaint} />
+          <Text style={styles.piedTexte}>{tontine.prochaineEcheance}</Text>
+        </View>
+        <View style={styles.piedBloc}>
+          <MaterialIcons name="people" size={13} color={colors.textFaint} />
+          <Text style={styles.piedTexte}>
+            {payes}/{total} payés
+          </Text>
+        </View>
+        <MaterialIcons name="chevron-right" size={18} color={colors.textFaint} />
+      </View>
+
+      <View style={styles.piste}>
+        <View
+          style={[
+            styles.pisteRemplie,
+            {
+              width: `${Math.round(ratio * 100)}%`,
+              backgroundColor: ratio === 1 ? colors.green : colors.mint,
+            },
+          ]}
+        />
       </View>
     </Pressable>
   );
@@ -130,66 +83,52 @@ export function TontineCard({ tontine, onPress }: Props) {
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
     card: {
-      marginBottom: 14,
-      borderRadius: 18,
+      marginBottom: 12,
+      borderRadius: radius.card,
       borderWidth: 1,
       borderColor: c.border,
       backgroundColor: c.card,
-      flexDirection: 'row',
-      overflow: 'hidden',
-      shadowColor: c.shadow,
-      shadowOpacity: 0.05,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 1,
+      paddingHorizontal: 14,
+      paddingTop: 14,
+      paddingBottom: 12,
     },
     presse: {
       opacity: 0.9,
     },
-    accent: {
-      width: 5,
-    },
-    corps: {
-      flex: 1,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-    },
-    ligneTitre: {
+    haut: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 10,
+      alignItems: 'center',
+    },
+    vignette: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: c.purpleSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     titreZone: {
       flex: 1,
+      marginLeft: 12,
     },
     nom: {
-      fontSize: 17,
-      fontWeight: '700',
+      fontSize: 15.5,
+      fontWeight: '600',
       color: c.text,
-      letterSpacing: 0,
     },
     montant: {
-      marginTop: 4,
-      fontSize: 13.5,
+      marginTop: 3,
+      fontSize: 12.5,
       color: c.textMuted,
     },
-    etat: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
+    badge: {
       paddingHorizontal: 9,
       paddingVertical: 4,
-      borderRadius: 20,
+      borderRadius: radius.pill,
     },
-    point: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-    },
-    etatTexte: {
+    badgeTexte: {
       fontSize: 11,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     pied: {
       marginTop: 12,
@@ -204,11 +143,11 @@ const makeStyles = (c: Palette) =>
     },
     piedTexte: {
       fontSize: 12,
-      color: c.textFaint,
+      color: c.textMuted,
     },
     piste: {
       marginTop: 12,
-      height: 5,
+      height: 6,
       borderRadius: 3,
       backgroundColor: c.cardMuted,
       overflow: 'hidden',
